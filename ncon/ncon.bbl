@@ -1,0 +1,204 @@
+%merlin.mbs apsrev4-1.bst 2010-07-25 4.21a (PWD, AO, DPC) hacked
+%Control: key (0)
+%Control: author (8) initials jnrlst
+%Control: editor formatted (1) identically to author
+%Control: production of article title (-1) disabled
+%Control: page (0) single
+%Control: year (1) truncated
+%Control: production of eprint (0) enabled
+\begin{thebibliography}{18}%
+\makeatletter
+\providecommand \@ifxundefined [1]{%
+ \@ifx{#1\undefined}
+}%
+\providecommand \@ifnum [1]{%
+ \ifnum #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \@ifx [1]{%
+ \ifx #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \natexlab [1]{#1}%
+\providecommand \enquote  [1]{``#1''}%
+\providecommand \bibnamefont  [1]{#1}%
+\providecommand \bibfnamefont [1]{#1}%
+\providecommand \citenamefont [1]{#1}%
+\providecommand \href@noop [0]{\@secondoftwo}%
+\providecommand \href [0]{\begingroup \@sanitize@url \@href}%
+\providecommand \@href[1]{\@@startlink{#1}\@@href}%
+\providecommand \@@href[1]{\endgroup#1\@@endlink}%
+\providecommand \@sanitize@url [0]{\catcode `\\12\catcode `\$12\catcode
+  `\&12\catcode `\#12\catcode `\^12\catcode `\_12\catcode `\%12\relax}%
+\providecommand \@@startlink[1]{}%
+\providecommand \@@endlink[0]{}%
+\providecommand \url  [0]{\begingroup\@sanitize@url \@url }%
+\providecommand \@url [1]{\endgroup\@href {#1}{\urlprefix }}%
+\providecommand \urlprefix  [0]{URL }%
+\providecommand \Eprint [0]{\href }%
+\providecommand \doibase [0]{http://dx.doi.org/}%
+\providecommand \selectlanguage [0]{\@gobble}%
+\providecommand \bibinfo  [0]{\@secondoftwo}%
+\providecommand \bibfield  [0]{\@secondoftwo}%
+\providecommand \translation [1]{[#1]}%
+\providecommand \BibitemOpen [0]{}%
+\providecommand \bibitemStop [0]{}%
+\providecommand \bibitemNoStop [0]{.\EOS\space}%
+\providecommand \EOS [0]{\spacefactor3000\relax}%
+\providecommand \BibitemShut  [1]{\csname bibitem#1\endcsname}%
+\let\auto@bib@innerbib\@empty
+%</preamble>
+\bibitem [{\citenamefont {White}(1992)}]{white1992}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.~R.}\ \bibnamefont
+  {White}},\ }\href {\doibase 10.1103/PhysRevLett.69.2863} {\bibfield
+  {journal} {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo
+  {volume} {69}},\ \bibinfo {pages} {2863} (\bibinfo {year}
+  {1992})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Verstraete}\ and\ \citenamefont
+  {Cirac}()}]{verstraete2004}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {F.}~\bibnamefont
+  {Verstraete}}\ and\ \bibinfo {author} {\bibfnamefont {J.~I.}\ \bibnamefont
+  {Cirac}},\ }\href {http://arxiv.org/abs/cond-mat/0407066v1} {}\Eprint
+  {http://arxiv.org/abs/cond-mat/0407066v1}
+  {arXiv:cond-mat/0407066v1 (2004)} \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Jordan}\ \emph {et~al.}(2008)\citenamefont {Jordan},
+  \citenamefont {Or\'us}, \citenamefont {Vidal}, \citenamefont {Verstraete},\
+  and\ \citenamefont {Cirac}}]{jordan2008}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Jordan}}, \bibinfo {author} {\bibfnamefont {R.}~\bibnamefont {Or\'us}},
+  \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont {Vidal}}, \bibinfo
+  {author} {\bibfnamefont {F.}~\bibnamefont {Verstraete}}, \ and\ \bibinfo
+  {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}},\ }\href {\doibase
+  10.1103/PhysRevLett.101.250602} {\bibfield  {journal} {\bibinfo  {journal}
+  {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {101}},\ \bibinfo {pages}
+  {250602} (\bibinfo {year} {2008})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Vidal}(2007)}]{vidal2007}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Vidal}},\ }\href {\doibase 10.1103/PhysRevLett.99.220405} {\bibfield
+  {journal} {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo
+  {volume} {99}},\ \bibinfo {eid} {220405} (\bibinfo {year}
+  {2007})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Cincio}\ \emph {et~al.}(2008)\citenamefont {Cincio},
+  \citenamefont {Dziarmaga},\ and\ \citenamefont {Rams}}]{cincio2008}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {L.}~\bibnamefont
+  {Cincio}}, \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Dziarmaga}}, \
+  and\ \bibinfo {author} {\bibfnamefont {M.~M.}\ \bibnamefont {Rams}},\ }\href
+  {\doibase 10.1103/PhysRevLett.100.240603} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {100}},\ \bibinfo
+  {pages} {240603} (\bibinfo {year} {2008})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Evenbly}\ and\ \citenamefont
+  {Vidal}(2009)}]{evenbly2009b}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Evenbly}}\ and\ \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Vidal}},\ }\href {\doibase 10.1103/PhysRevLett.102.180406} {\bibfield
+  {journal} {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo
+  {volume} {102}},\ \bibinfo {pages} {180406} (\bibinfo {year}
+  {2009})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Vidal}(2010)}]{vidal2010}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Vidal}},\ }in\ \href {http://arxiv.org/abs/0912.1651v2} {\emph {\bibinfo
+  {booktitle} {Understanding Quantum Phase Transitions}}},\ \bibinfo {editor}
+  {edited by\ \bibinfo {editor} {\bibfnamefont {L.~D.}\ \bibnamefont {Carr}}}\
+  (\bibinfo  {publisher} {Taylor \& Francis},\ \bibinfo {address} {Boca
+  Raton},\ \bibinfo {year} {2010})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Nishino}\ and\ \citenamefont
+  {Okunishi}(1997)}]{nishino1997}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Nishino}}\ and\ \bibinfo {author} {\bibfnamefont {K.}~\bibnamefont
+  {Okunishi}},\ }\href {\doibase 10.1143/JPSJ.66.3040} {\bibfield  {journal}
+  {\bibinfo  {journal} {J. Phys. Soc. Jpn.}\ }\textbf {\bibinfo {volume}
+  {66}},\ \bibinfo {pages} {3040} (\bibinfo {year} {1997})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Levin}\ and\ \citenamefont {Nave}(2007)}]{levin2007}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Levin}}\ and\ \bibinfo {author} {\bibfnamefont {C.~P.}\ \bibnamefont
+  {Nave}},\ }\href {\doibase 10.1103/PhysRevLett.99.120601} {\bibfield
+  {journal} {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo
+  {volume} {99}},\ \bibinfo {pages} {120601} (\bibinfo {year}
+  {2007})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Gu}\ \emph {et~al.}(2008)\citenamefont {Gu},
+  \citenamefont {Levin},\ and\ \citenamefont {Wen}}]{gu2008}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Z.-C.}\ \bibnamefont
+  {Gu}}, \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Levin}}, \ and\
+  \bibinfo {author} {\bibfnamefont {X.-G.}\ \bibnamefont {Wen}},\ }\href
+  {\doibase 10.1103/PhysRevB.78.205116} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {78}},\ \bibinfo
+  {pages} {205116} (\bibinfo {year} {2008})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Gu}\ and\ \citenamefont {Wen}(2009)}]{gu2009}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Z.-C.}\ \bibnamefont
+  {Gu}}\ and\ \bibinfo {author} {\bibfnamefont {X.-G.}\ \bibnamefont {Wen}},\
+  }\href {\doibase 10.1103/PhysRevB.80.155131} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {80}},\ \bibinfo
+  {pages} {155131} (\bibinfo {year} {2009})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Zhao}\ \emph {et~al.}(2010)\citenamefont {Zhao},
+  \citenamefont {Xie}, \citenamefont {Chen}, \citenamefont {Wei}, \citenamefont
+  {Cai},\ and\ \citenamefont {Xiang}}]{zhao2010}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.~H.}\ \bibnamefont
+  {Zhao}}, \bibinfo {author} {\bibfnamefont {Z.~Y.}\ \bibnamefont {Xie}},
+  \bibinfo {author} {\bibfnamefont {Q.~N.}\ \bibnamefont {Chen}}, \bibinfo
+  {author} {\bibfnamefont {Z.~C.}\ \bibnamefont {Wei}}, \bibinfo {author}
+  {\bibfnamefont {J.~W.}\ \bibnamefont {Cai}}, \ and\ \bibinfo {author}
+  {\bibfnamefont {T.}~\bibnamefont {Xiang}},\ }\href {\doibase
+  10.1103/PhysRevB.81.174411} {\bibfield  {journal} {\bibinfo  {journal} {Phys.
+  Rev. B}\ }\textbf {\bibinfo {volume} {81}},\ \bibinfo {pages} {174411}
+  (\bibinfo {year} {2010})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Pfeifer}()}]{pfeifer2013a}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.~N.~C.}\
+  \bibnamefont {Pfeifer}},\ }\href {http://arxiv.org/abs/1304.6112} {}\Eprint
+  {http://arxiv.org/abs/1304.6112}
+  {arXiv:1304.6112 [cond-mat.str-el] (2013)} \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Pfeifer}(2011)}]{pfeifer2011b}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.~N.~C.}\
+  \bibnamefont {Pfeifer}},\ }\emph {\bibinfo {title} {Simulation of Anyons
+  Using Symmetric Tensor Network Algorithms}},\ \href@noop {} {Ph.D. thesis},\
+  \bibinfo  {school} {The University of Queensland} (\bibinfo {year} {2011}),\
+  \Eprint {http://arxiv.org/abs/1202.1522v2}
+  {arXiv:1202.1522v2 [cond-mat.str-el]} \BibitemShut {NoStop}%
+\bibitem [{Note1()}]{Note1}%
+  \BibitemOpen
+  \bibinfo {note} {Note that when two tensors are contracted together, all
+  indices connecting these tensors should be listed consecutively. Sequences
+  which do not satisfy this condition (i)~are always of suboptimal efficiency
+  (see also \protect {Sec.~\ref {sec:suboptimal}}), and (ii)~will result in a
+  warning being generated.}\BibitemShut {Stop}%
+\bibitem [{\citenamefont {Evenbly}\ and\ \citenamefont
+  {Pfeifer}()}]{evenbly2013}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Evenbly}}\ and\ \bibinfo {author} {\bibfnamefont {R.~N.~C.}\ \bibnamefont
+  {Pfeifer}},\ }\href@noop {} {}\Eprint {http://arxiv.org/abs/1310.8023} {arXiv:1310.8023 [cond-mat.str-el] (2013)}
+  \BibitemShut {NoStop}%
+\bibitem [{Note2()}]{Note2}%
+  \BibitemOpen
+  \bibinfo {note} {Note that \protect \textsc {Matlab}{} leaves trailing
+  indices of dimension~1 implicit, and so will report the size of tensor~C as
+  $3\times 3$ if queried, and not $3\times 3\times 1$. Equally, it is also
+  valid to create tensor~C using the command \protect \texttt {C~=~rand(3,3);}
+  instead of \protect \texttt {C~=~rand(3,3,1);} as given above.}\BibitemShut
+  {Stop}%
+\bibitem [{\citenamefont {Lam}\ \emph {et~al.}(1997)\citenamefont {Lam},
+  \citenamefont {Sadayappan},\ and\ \citenamefont {Wenger}}]{lam1997}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {C.-C.}\ \bibnamefont
+  {Lam}}, \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont {Sadayappan}}, \
+  and\ \bibinfo {author} {\bibfnamefont {R.}~\bibnamefont {Wenger}},\ }\href
+  {\doibase 10.1142/S0129626497000176} {\bibfield  {journal} {\bibinfo
+  {journal} {Parallel Processing Letters}\ }\textbf {\bibinfo {volume} {07}},\
+  \bibinfo {pages} {157} (\bibinfo {year} {1997})}\BibitemShut {NoStop}%
+\end{thebibliography}%
