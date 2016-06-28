@@ -5,25 +5,25 @@ function ising_2d
   chi = 5;
   chi_init = 3;
 
-  C = random_C();
-  T = random_T();
-  a = construct_a(0.35);
-
-  grow_lattice(C, T, a);
-
   % Works only for beta > beta_crit.
   function m = exact_magnetization(beta)
     m = (1 - sinh(2*beta)^-4)^(1/8);
   end
 
-  function [T C] = perform_ctm(tolerance)
+  function [T C] = perform_ctm(tolerance, max_iterations)
     C = random_C();
     T = random_T();
     singular_values = initial_singular_values();
     a = construct_a();
 
-    % bla bla
+    for iteration = 1:max_iterations
+      singular_values_old = singular_values
+      [C, T, singular_values] = grow_lattice(C, T, a)
 
+      if convergence(singular_values, singular_values_old) < tolerance
+        break
+      end
+    end
   end
 
   function [C, T, singular_values] = grow_lattice(C, T, a)
@@ -45,9 +45,15 @@ function ising_2d
     T = ncon({T, U, U_transpose}, {[1 2 3 4 -1], [1 2 -2], [3 4 -3]});
 
     % Scale elements to prevent values from diverging when performing numerous growth steps.
-    C = scale_by_largest_element(C)
-    T = scale_by_largest_element(T)
-    singular_values = scale_by_largest_element(diag(s))
+    C = scale_by_largest_element(C);
+    C = symmetrize_C(C);
+    T = scale_by_largest_element(T);
+    T = symmetrize_T(T);
+    singular_values = scale_by_largest_element(diag(s));
+  end
+
+  function c = convergence(singular_values, singular_values_old)
+    c = sum(abs(singular_values - singular_values_old));
   end
 
   function M = scale_by_largest_element(M)
