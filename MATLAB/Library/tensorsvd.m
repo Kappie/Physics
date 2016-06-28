@@ -4,7 +4,7 @@ function [u,s,v]=tensorsvd(T,ll,rl,n,absorb,cut)
 %T: tensor
 %ll: left legs
 %rl: right legs
-%n: numer of singular values: use inf for all
+%n: number of singular values: use inf for all
 %absorb: 'l': left absorb
 %'m': split absorb (sqrt of singular values)
 %'r': right absorb
@@ -34,7 +34,7 @@ end
 
 ss=size(u);
 u=reshape(u,[dl,ss(2)]);
-v=reshape(v,[dr,ss(2)]); 
+v=reshape(v,[dr,ss(2)]);
 
 v=conj(v);
 
