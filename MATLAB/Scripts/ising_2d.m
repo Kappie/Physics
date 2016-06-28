@@ -16,10 +16,17 @@ function ising_2d
     m = (1 - sinh(2*beta)^-4)^(1/8);
   end
 
-  function [T C] = perform_ctm_step()
+  function [T C] = perform_ctm(tolerance)
+    C = random_C();
+    T = random_T();
+    singular_values = initial_singular_values();
+    a = construct_a();
+
+    % bla bla
+
   end
 
-  function [C, T] = grow_lattice(C, T, a)
+  function [C, T, singular_values] = grow_lattice(C, T, a)
     % Final order is specified so that the new tensor is ordered according to
     % [d, chi, c, chi], with the pairs of c, chi corresponding to what will be the reshaped
     % legs of the new C.
@@ -36,6 +43,18 @@ function ising_2d
     % to attach U first, so that U.U_transpose becomes a unity in the relevant
     % subspace when we construct the lattice later.
     T = ncon({T, U, U_transpose}, {[1 2 3 4 -1], [1 2 -2], [3 4 -3]});
+
+    % Scale elements to prevent values from diverging when performing numerous growth steps.
+    C = scale_by_largest_element(C)
+    T = scale_by_largest_element(T)
+    singular_values = scale_by_largest_element(diag(s))
+  end
+
+  function M = scale_by_largest_element(M)
+    M = M / max(M(:))
+  end
+
+  function c = convergence_rate(singular_values)
   end
 
   function Q = construct_Q(beta)
@@ -65,20 +84,29 @@ function ising_2d
     g(2, 2, 2, 2) = -1;
   end
 
-  function T = random_T
+  function s = initial_singular_values()
+    s = ones(1, chi) / chi;
+  end
+
+  function T = random_T()
+    T = symmetrize_T(rand(2, chi_init, chi_init))
+  end
+
+  function C = random_C()
+    C = symmetrize_C(rand(chi_init))
+  end
+
+  function C = symmetrize_C(C)
+    C = symmetrize(C)
+  end
+
+  function T = symmetrize_T(T)
     % Why do we not symmetrize in the physical dimension?
-    T = rand(2, chi_init, chi_init);
-    T(1,:,:) = random_symmetric_matrix(chi_init);
-    T(2,:,:) = random_symmetric_matrix(chi_init);
+    T(1,:,:) = symmetrize(T(1,:,:));
+    T(2,:,:) = symmetrize(T(2,:,:));
   end
 
-  function C = random_C
-    C = random_symmetric_matrix(chi_init);
+  function m = symmetrize(m)
+    m = triu(m) + triu(m, 1)';
   end
-
-  function r = random_symmetric_matrix(dim)
-    r = rand(dim);
-    r = triu(r) + triu(r, 1)';
-  end
-
 end

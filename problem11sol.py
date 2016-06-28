@@ -1,8 +1,8 @@
 from __future__ import division
-import numpy as np 
+import numpy as np
 import scipy.linalg as spl
 import numpy.linalg as npl
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 # Parameters
 J = -1
@@ -67,7 +67,7 @@ def GrowT(a, T, d, Chi):
 def LatticeGrowthStep(a, T, C, d, Chi):
 	newC = GrowC(a,T,C,d,Chi)
 	U, s, V = npl.svd(newC, full_matrices=0)
-	V = V[:Chi,:] 	
+	V = V[:Chi,:]
 	newC = np.dot( np.dot(V, newC), np.transpose(V))
 	newT = GrowT(a,T,d,Chi)
 	newT = np.tensordot(newT, V, axes=[1,1])
@@ -94,7 +94,7 @@ def ComputeMagnetisation(a, b, T ,C):
 	env = np.tensordot(env, env, axes=[2,0])
 	env = np.tensordot(env, env, axes=([3,0],[0,3]))
 	return np.tensordot(env, b, axes=([0,1,2,3],[0,1,2,3])) \
-		/ np.tensordot(env, a, axes=([0,1,2,3],[0,1,2,3])) 
+		/ np.tensordot(env, a, axes=([0,1,2,3],[0,1,2,3]))
 
 
 
@@ -116,7 +116,7 @@ def PlotMag(betaVals, ChiVals, plotName):
 			print 'Chi: %2d, beta: %.3f, #iterations: %4d, magnetisation: %.8f, diff: %0.8f' \
 				 %(Chi, beta, it, mag[i,j], diff_with_mag_exact)
 
-	mag_exact = [ExactMag(x) for x in np.linspace(betaVals[0],betaVals[-1],1000)]	
+	mag_exact = [ExactMag(x) for x in np.linspace(betaVals[0],betaVals[-1],1000)]
 
 	plt.figure()
 	for i, Chi in enumerate(ChiList):
