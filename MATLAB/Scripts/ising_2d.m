@@ -1,5 +1,5 @@
 function ising_2d
-  rng(10)
+  % rng(10)
 
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   J = 1;
@@ -8,18 +8,22 @@ function ising_2d
   max_iterations = 200;
   tolerance = 1e-6;
 
-  beta = 1.0;
+  beta = 0.45;
 
   [C, T, iterations] = calculate_environment(beta, tolerance, max_iterations);
 
-  m = magnetization(beta, C, T)
-  m_exact = exact_magnetization(beta)
+  m = order_parameter(beta, C, T)
+  m_exact = exact_order_parameter(beta)
 
   % compare_environments(beta, C, T);
 
   % Works only for beta > beta_crit.
-  function m = exact_magnetization(beta)
+  function m = exact_order_parameter(beta)
     m = (1 - sinh(2*beta)^-4)^(1/8);
+  end
+
+  function m = order_parameter(beta, C, T)
+    m = abs(magnetization(beta, C, T));
   end
 
   % Compute magnetization using converged environment tensors.
