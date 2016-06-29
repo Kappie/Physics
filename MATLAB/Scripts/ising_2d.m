@@ -10,17 +10,10 @@ function ising_2d
 
   beta = 1.0;
 
-  a = construct_a(beta);
-  b = construct_b(beta);
-  sum(a(:))
-  sum(b(:))
+  [C, T, iterations] = calculate_environment(beta, tolerance, max_iterations);
 
-
-
-  % [C, T, iterations] = calculate_environment(beta, tolerance, max_iterations);
-  %
-  % m = magnetization(beta, C, T)
-  % m_exact = exact_magnetization(beta)
+  m = magnetization(beta, C, T)
+  m_exact = exact_magnetization(beta)
 
   % compare_environments(beta, C, T);
 
@@ -151,7 +144,7 @@ function ising_2d
 
   function b = construct_b(beta)
     g = construct_g();
-    P = sqrt(construct_Q(beta));
+    P = sqrtm(construct_Q(beta));
     b = ncon({P, P, P, P, g}, {[-1, 1], [-2, 2], [-3, 3], [-4, 4], [1, 2, 3, 4]});
   end
 
