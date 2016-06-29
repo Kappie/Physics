@@ -129,5 +129,9 @@ def PlotMag(betaVals, ChiVals, plotName):
 	plt.savefig(plotName)
 
 
-PlotMag(betaList, ChiList, 'Magnetisation_Chi')
-PlotMag(betaZoom, ChiList, 'Magnetisation_Chi_PT')
+# PlotMag(betaList, ChiList, 'Magnetisation_Chi')
+# PlotMag(betaZoom, ChiList, 'Magnetisation_Chi_PT')
+
+a, b = ConstructTensors(-1, 1)
+print np.sum(a)
+print np.sum(b)
