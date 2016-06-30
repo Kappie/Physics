@@ -1,25 +1,77 @@
 function ising_2d
   % rng(10)
 
+  format long
+
+  data_dir = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/';
+  filename = 'chi8tolerance1e-8adjusted.dat'
+
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
+  T_crit = 1 / beta_crit;
   J = 1;
-  chi = 5;
-  chi_init = 3;
-  max_iterations = 200;
-  tolerance = 1e-6;
+  chi = 8;
+  chi_init = 4;
+  max_iterations = 500;
+  tolerance = 1e-8;
 
-  beta = 0.45;
+  betas = linspace(beta_crit - 0.01, beta_crit + 0.01, 50);
+  % betas = [0.5, 0.6];
 
-  [C, T, iterations] = calculate_environment(beta, tolerance, max_iterations);
+  run_simulation(betas, tolerance, max_iterations);
 
-  m = order_parameter(beta, C, T)
-  m_exact = exact_order_parameter(beta)
 
-  % compare_environments(beta, C, T);
+  function run_simulation(betas, tolerance, max_iterations)
+    number_of_points = numel(betas);
+    order_parameters = zeros(1, number_of_points);
+    C = random_C();
+    T = random_T();
+
+    % Loop in reverse to not get stuck in magnetized state?
+    % for i = number_of_points:-1:1
+    for i = 1:number_of_points
+      % C = random_C();
+      % T = random_T();
+      [C, T, iterations] = calculate_environment(betas(i), tolerance, max_iterations, C, T);
+      order_parameters(i) = order_parameter(betas(i), C, T);
+    end
+
+    exact_order_parameters = arrayfun(@exact_order_parameter, betas);
+    errors = abs(order_parameters - exact_order_parameters);
+
+    save_to_file(betas, errors);
+    % make_plot(betas, order_parameters);
+  end
+
+  function save_to_file(betas, order_parameters)
+    path = fullfile(data_dir, filename);
+    file = fopen(path, 'w');
+    fprintf(file, '%.5e %.5e\n', [betas; order_parameters]);
+    fclose(file);
+  end
+
+  function make_plot(betas, order_parameters)
+    exact_order_parameters = arrayfun(@exact_order_parameter, betas);
+    errors = abs(order_parameters - exact_order_parameters)
+
+    % figure
+    % hold on
+
+    % plot(betas, order_parameters, 'o', betas, exact_order_parameters, 'x');
+    semilogy(betas, errors, 'ro');
+    title('Order parameter of 2D Ising model');
+    ylabel('error in m');
+    xlabel('beta (1/T)');
+    % legend('calculated order parameter', 'exact order parameter');
+    % legend('Location', 'NorthWest')
+  end
 
   % Works only for beta > beta_crit.
   function m = exact_order_parameter(beta)
-    m = (1 - sinh(2*beta)^-4)^(1/8);
+    if beta > beta_crit
+      m = (1 - sinh(2*beta).^-4).^(1/8);
+    else
+      m = 0;
+    end
   end
 
   function m = order_parameter(beta, C, T)
@@ -71,9 +123,9 @@ function ising_2d
     environment = ncon({half, half}, {[-1 -2 1 2], [-3 -4 2 1]});
   end
 
-  function [C, T, iteration] = calculate_environment(beta, tolerance, max_iterations)
-    C = random_C();
-    T = random_T();
+  function [C, T, iteration] = calculate_environment(beta, tolerance, max_iterations, initial_C, initial_T)
+    C = initial_C;
+    T = initial_T;
     singular_values = initial_singular_values();
     a = construct_a(beta);
 
@@ -82,12 +134,14 @@ function ising_2d
       [C, T, singular_values] = grow_lattice(C, T, a);
 
       c = convergence(singular_values, singular_values_old);
-      disp(iteration)
-      disp(c)
 
-      if convergence(singular_values, singular_values_old) < tolerance
+      if c < tolerance
         break
       end
+    end
+    if c > tolerance
+      display('Tolerance not reached.')
+      display(c)
     end
   end
 
@@ -121,9 +175,12 @@ function ising_2d
   function c = convergence(singular_values, singular_values_old)
     % Sometimes it happens that the current singular values vector is smaller
     % than the old one, because MATLAB's svd procedure throws away excessively
-    % small singular values. The line below adds zeros to singular_values to match
+    % small singular values. The code below adds zeros to singular_values to match
     % the dimension of singular_values_old.
-    singular_values(numel(singular_values_old)) = 0;
+    if size(singular_values, 1) < size(singular_values_old, 1)
+      singular_values(numel(singular_values_old)) = 0;
+    end
+
     c = sum(abs(singular_values - singular_values_old));
   end
 
