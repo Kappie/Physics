@@ -4,17 +4,17 @@ function ising_2d
   format long
 
   data_dir = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/';
-  filename = 'chi16_magnetization.dat'
+  filename = 'chi4_adjustedreverse.dat'
 
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
   J = 1;
-  chi = 16;
-  chi_init = 8;
+  chi = 4;
+  chi_init = 4;
   max_iterations = 200;
   tolerance = 1e-6;
 
-  temperatures = linspace(T_crit - 0.1, T_crit + 0.1, 20);
+  temperatures = linspace(T_crit - 0.1, T_crit + 0.1, 50);
   betas = 1./temperatures;
   % betas = [0.5, 0.6, 0.7];
 
@@ -24,14 +24,14 @@ function ising_2d
   function run_simulation(betas, tolerance, max_iterations)
     number_of_points = numel(betas);
     order_parameters = zeros(1, number_of_points);
-    % C = random_C();
-    % T = random_T();
+    C = random_C();
+    T = random_T();
 
     % Loop in reverse to not get stuck in magnetized state?
-    % for i = number_of_points:-1:1
-    for i = 1:number_of_points
-      C = random_C();
-      T = random_T();
+    for i = number_of_points:-1:1
+    % for i = 1:number_of_points
+      % C = random_C();
+      % T = random_T();
       [C, T, iterations] = calculate_environment(betas(i), tolerance, max_iterations, C, T);
       order_parameters(i) = order_parameter(betas(i), C, T);
     end
