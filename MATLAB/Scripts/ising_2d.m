@@ -4,18 +4,19 @@ function ising_2d
   format long
 
   data_dir = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/';
-  filename = 'chi8tolerance1e-8adjusted.dat'
+  filename = 'chi16_magnetization.dat'
 
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
   J = 1;
-  chi = 8;
-  chi_init = 4;
-  max_iterations = 500;
-  tolerance = 1e-8;
+  chi = 16;
+  chi_init = 8;
+  max_iterations = 200;
+  tolerance = 1e-6;
 
-  betas = linspace(beta_crit - 0.01, beta_crit + 0.01, 50);
-  % betas = [0.5, 0.6];
+  temperatures = linspace(T_crit - 0.1, T_crit + 0.1, 20);
+  betas = 1./temperatures;
+  % betas = [0.5, 0.6, 0.7];
 
   run_simulation(betas, tolerance, max_iterations);
 
@@ -23,14 +24,14 @@ function ising_2d
   function run_simulation(betas, tolerance, max_iterations)
     number_of_points = numel(betas);
     order_parameters = zeros(1, number_of_points);
-    C = random_C();
-    T = random_T();
+    % C = random_C();
+    % T = random_T();
 
     % Loop in reverse to not get stuck in magnetized state?
     % for i = number_of_points:-1:1
     for i = 1:number_of_points
-      % C = random_C();
-      % T = random_T();
+      C = random_C();
+      T = random_T();
       [C, T, iterations] = calculate_environment(betas(i), tolerance, max_iterations, C, T);
       order_parameters(i) = order_parameter(betas(i), C, T);
     end
@@ -38,15 +39,26 @@ function ising_2d
     exact_order_parameters = arrayfun(@exact_order_parameter, betas);
     errors = abs(order_parameters - exact_order_parameters);
 
-    save_to_file(betas, errors);
+    save_to_file(betas, order_parameters);
     % make_plot(betas, order_parameters);
   end
 
   function save_to_file(betas, order_parameters)
     path = fullfile(data_dir, filename);
-    file = fopen(path, 'w');
-    fprintf(file, '%.5e %.5e\n', [betas; order_parameters]);
-    fclose(file);
+    write = true;
+    if exist(path, 'file')
+      answer = input('Warning, file exists. Do you want to overwrite? y/n [n]\n', 's');
+      if ~strcmp(answer, 'y')
+        write = false;
+      end
+    end
+
+    if write
+      file = fopen(path, 'w');
+      fprintf(file, '%.5e %.5e\n', [1./betas; order_parameters]);
+      fclose(file);
+      sprintf(['Wrote to file ' path '.\n'])
+    end
   end
 
   function make_plot(betas, order_parameters)
