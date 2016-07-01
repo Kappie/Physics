@@ -1,6 +1,11 @@
-temperatures = [1, 2, 3];
-order_parameters = ising_2d(temperatures);
-save_to_file([temperatures; order_parameters]', 'testje');
+beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
+T_crit = 1 / beta_crit;
+
+temperatures = linspace(T_crit - 0.1, T_crit + 0.1, 20)
+order_parameters = ising_2d(temperatures)
+% save_to_file([temperatures; order_parameters]', 'testje');
+
+plot_order_parameter(temperatures, order_parameters);
 
 
 
