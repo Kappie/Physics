@@ -1,35 +1,42 @@
-function ising_2d
-  % rng(10)
+function order_parameters = ising_2d(temperatures, varargin)
+  p = inputParser;
+  default_chi = 4;
+  default_chi_init = 2;
+  default_tolerance = 1e-6;
+  default_max_iterations = 200;
 
-  format long
+  addRequired(p, 'temperatures');
+  addParameter(p, 'chi', default_chi);
+  addParameter(p, 'chi_init', default_chi_init);
+  addParameter(p, 'tolerance', default_tolerance);
+  addParameter(p, 'max_iterations', default_max_iterations);
 
-  data_dir = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/';
-  filename = 'chi4_adjustedreverse.dat'
+  parse(p, temperatures, varargin{:});
+
+  chi = p.Results.chi;
+  chi_init = p.Results.chi_init;
+  tolerance = p.Results.tolerance;
+  max_iterations = p.Results.max_iterations;
+
+
 
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
   J = 1;
-  chi = 4;
-  chi_init = 4;
-  max_iterations = 200;
-  tolerance = 1e-6;
 
-  temperatures = linspace(T_crit - 0.1, T_crit + 0.1, 50);
   betas = 1./temperatures;
-  % betas = [0.5, 0.6, 0.7];
-
-  run_simulation(betas, tolerance, max_iterations);
+  order_parameters = run_simulation();
 
 
-  function run_simulation(betas, tolerance, max_iterations)
+  function order_parameters = run_simulation()
     number_of_points = numel(betas);
     order_parameters = zeros(1, number_of_points);
     C = random_C();
     T = random_T();
 
     % Loop in reverse to not get stuck in magnetized state?
-    for i = number_of_points:-1:1
-    % for i = 1:number_of_points
+    % for i = number_of_points:-1:1
+    for i = 1:number_of_points
       % C = random_C();
       % T = random_T();
       [C, T, iterations] = calculate_environment(betas(i), tolerance, max_iterations, C, T);
@@ -39,7 +46,7 @@ function ising_2d
     exact_order_parameters = arrayfun(@exact_order_parameter, betas);
     errors = abs(order_parameters - exact_order_parameters);
 
-    save_to_file(betas, order_parameters);
+    % save_to_file(betas, order_parameters);
     % make_plot(betas, order_parameters);
   end
 
