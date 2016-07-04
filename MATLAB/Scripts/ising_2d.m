@@ -4,6 +4,7 @@ function order_parameters = ising_2d(temperatures, varargin)
   default_chi_init = 2;
   default_tolerance = 1e-6;
   default_max_iterations = 200;
+  default_min_iterations = 10;
   default_tensor_initialization = 'random';
 
   addRequired(p, 'temperatures');
@@ -11,6 +12,7 @@ function order_parameters = ising_2d(temperatures, varargin)
   addParameter(p, 'chi_init', default_chi_init);
   addParameter(p, 'tolerance', default_tolerance);
   addParameter(p, 'max_iterations', default_max_iterations);
+  addParameter(p, 'min_iterations', default_min_iterations);
   addParameter(p, 'tensor_initialization', default_tensor_initialization);
 
   parse(p, temperatures, varargin{:});
@@ -19,6 +21,7 @@ function order_parameters = ising_2d(temperatures, varargin)
   chi_init = p.Results.chi_init;
   tolerance = p.Results.tolerance;
   max_iterations = p.Results.max_iterations;
+  min_iterations = p.Results.min_iterations;
   tensor_initialization = p.Results.tensor_initialization;
 
   J = 1;
@@ -109,7 +112,7 @@ function order_parameters = ising_2d(temperatures, varargin)
 
       c = convergence(singular_values, singular_values_old);
 
-      if c < tolerance
+      if c < tolerance && iteration >= min_iterations
         sprintf(['Tolerance reached for temperature ', num2str(1/beta), ...
           '. Number of iterations: ' num2str(iteration), '.\n'])
         break

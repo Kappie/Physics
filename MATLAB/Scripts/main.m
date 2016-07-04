@@ -1,13 +1,15 @@
 function main
+  clc;
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
-  temperatures = linspace(0.1, T_crit + 2, 200);
+  temperatures = linspace(T_crit - 0.1, T_crit + 0.1, 30);
 
   simulation = true;
   overwrite = true;
   plotting = true;
 
-  chi_values = [10];
+  min_iterations = 30;
+  chi_values = [2, 4, 6, 8, 10];
   max_iterations_values = [10000];
   tolerance_values = [1e-6];
   tensor_initialization = 'adjusted_reverse';
@@ -23,7 +25,8 @@ function main
         for max_iterations = max_iterations_values
 
           order_parameters = ising_2d(temperatures, 'chi', chi, 'chi_init', 2, ...
-            'tolerance', tolerance, 'max_iterations', max_iterations, 'tensor_initialization', tensor_initialization);
+            'tolerance', tolerance, 'max_iterations', max_iterations, ...
+            'min_iterations', min_iterations, 'tensor_initialization', tensor_initialization);
 
           save_to_file([temperatures; order_parameters]', ...
             suggested_file_name(chi, tolerance, max_iterations, tensor_initialization), overwrite);
@@ -47,8 +50,11 @@ function main
       end
     end
 
+    legend(arrayfun(@num2str, chi_values, 'UniformOutput', false));
+
 
     line([T_crit, T_crit], [0, 1], 'LineStyle', '--');
+    hold off;
   end
 
   % errors = abs(order_parameters - arrayfun(@exact_order_parameter, 1./temperatures))
