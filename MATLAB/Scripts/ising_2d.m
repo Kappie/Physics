@@ -4,12 +4,14 @@ function order_parameters = ising_2d(temperatures, varargin)
   default_chi_init = 2;
   default_tolerance = 1e-6;
   default_max_iterations = 200;
+  default_tensor_initialization = 'random';
 
   addRequired(p, 'temperatures');
   addParameter(p, 'chi', default_chi);
   addParameter(p, 'chi_init', default_chi_init);
   addParameter(p, 'tolerance', default_tolerance);
   addParameter(p, 'max_iterations', default_max_iterations);
+  addParameter(p, 'tensor_initialization', default_tensor_initialization);
 
   parse(p, temperatures, varargin{:});
 
@@ -17,11 +19,8 @@ function order_parameters = ising_2d(temperatures, varargin)
   chi_init = p.Results.chi_init;
   tolerance = p.Results.tolerance;
   max_iterations = p.Results.max_iterations;
+  tensor_initialization = p.Results.tensor_initialization;
 
-
-
-  beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
-  T_crit = 1 / beta_crit;
   J = 1;
 
   betas = 1./temperatures;
@@ -35,61 +34,17 @@ function order_parameters = ising_2d(temperatures, varargin)
     T = random_T();
 
     % Loop in reverse to not get stuck in magnetized state?
-    % for i = number_of_points:-1:1
-    for i = 1:number_of_points
-      % C = random_C();
-      % T = random_T();
+    for i = number_of_points:-1:1
+    % for i = 1:number_of_points
+      % If not using random initialization, the converged environment tensors
+      % T, C at the previously calculated beta are used.
+      if strcmp(tensor_initialization, 'random')
+        C = random_C();
+        T = random_T();
+      end
+
       [C, T, iterations] = calculate_environment(betas(i), tolerance, max_iterations, C, T);
       order_parameters(i) = order_parameter(betas(i), C, T);
-    end
-
-    exact_order_parameters = arrayfun(@exact_order_parameter, betas);
-    errors = abs(order_parameters - exact_order_parameters);
-
-    % save_to_file(betas, order_parameters);
-    % make_plot(betas, order_parameters);
-  end
-
-  function save_to_file(betas, order_parameters)
-    path = fullfile(data_dir, filename);
-    write = true;
-    if exist(path, 'file')
-      answer = input('Warning, file exists. Do you want to overwrite? y/n [n]\n', 's');
-      if ~strcmp(answer, 'y')
-        write = false;
-      end
-    end
-
-    if write
-      file = fopen(path, 'w');
-      fprintf(file, '%.5e %.5e\n', [1./betas; order_parameters]);
-      fclose(file);
-      sprintf(['Wrote to file ' path '.\n'])
-    end
-  end
-
-  function make_plot(betas, order_parameters)
-    exact_order_parameters = arrayfun(@exact_order_parameter, betas);
-    errors = abs(order_parameters - exact_order_parameters)
-
-    % figure
-    % hold on
-
-    % plot(betas, order_parameters, 'o', betas, exact_order_parameters, 'x');
-    semilogy(betas, errors, 'ro');
-    title('Order parameter of 2D Ising model');
-    ylabel('error in m');
-    xlabel('beta (1/T)');
-    % legend('calculated order parameter', 'exact order parameter');
-    % legend('Location', 'NorthWest')
-  end
-
-  % Works only for beta > beta_crit.
-  function m = exact_order_parameter(beta)
-    if beta > beta_crit
-      m = (1 - sinh(2*beta).^-4).^(1/8);
-    else
-      m = 0;
     end
   end
 
@@ -196,8 +151,14 @@ function order_parameters = ising_2d(temperatures, varargin)
     % than the old one, because MATLAB's svd procedure throws away excessively
     % small singular values. The code below adds zeros to singular_values to match
     % the dimension of singular_values_old.
-    if size(singular_values, 1) < size(singular_values_old, 1)
-      singular_values(numel(singular_values_old)) = 0;
+    if size(singular_values, 1) < chi
+      singular_values(chi) = 0;
+    end
+
+    % If chi_init is small enough, the bond dimension of C and T will not exceed
+    % chi for the first few steps.
+    if size(singular_values_old, 1) < chi
+      singular_values_old(chi) = 0;
     end
 
     c = sum(abs(singular_values - singular_values_old));
@@ -265,4 +226,5 @@ function order_parameters = ising_2d(temperatures, varargin)
   function m = symmetrize(m)
     m = triu(m) + triu(m, 1)';
   end
+
 end
