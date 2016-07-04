@@ -1,13 +1,13 @@
 function main
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
-  temperatures = linspace(T_crit - 1, T_crit + 4, 100);
+  temperatures = linspace(T_crit - 1, T_crit + 1, 50);
 
   simulation = true;
   overwrite = true;
   plotting = true;
 
-  chi_values = [12];
+  chi_values = [2, 10];
   max_iterations_values = [10000];
   tolerance_values = [1e-6];
   tensor_initialization = 'adjusted_reverse';
