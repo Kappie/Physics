@@ -2,16 +2,16 @@ function main
   clc;
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
-  temperatures = linspace(T_crit - 0.1, T_crit + 0.1, 30);
+  temperatures = linspace(T_crit - .1, T_crit + .1, 10);
 
   simulation = true;
   overwrite = true;
   plotting = true;
 
-  min_iterations = 30;
-  chi_values = [2, 4, 6, 8, 10];
+  min_iterations = 400;
+  chi_values = [8];
   max_iterations_values = [10000];
-  tolerance_values = [1e-6];
+  tolerance_values = [1];
   tensor_initialization = 'adjusted_reverse';
   % max_iterations_values = [500];
 

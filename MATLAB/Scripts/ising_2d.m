@@ -4,7 +4,7 @@ function order_parameters = ising_2d(temperatures, varargin)
   default_chi_init = 2;
   default_tolerance = 1e-6;
   default_max_iterations = 200;
-  default_min_iterations = 10;
+  default_min_iterations = 0;
   default_tensor_initialization = 'random';
 
   addRequired(p, 'temperatures');
@@ -46,7 +46,7 @@ function order_parameters = ising_2d(temperatures, varargin)
         T = random_T();
       end
 
-      [C, T, iterations] = calculate_environment(betas(i), tolerance, max_iterations, C, T);
+      [C, T] = calculate_environment(betas(i), C, T);
       order_parameters(i) = order_parameter(betas(i), C, T);
     end
   end
@@ -100,15 +100,17 @@ function order_parameters = ising_2d(temperatures, varargin)
     environment = ncon({half, half}, {[-1 -2 1 2], [-3 -4 2 1]});
   end
 
-  function [C, T, iteration] = calculate_environment(beta, tolerance, max_iterations, initial_C, initial_T)
+  function [C, T] = calculate_environment(beta, initial_C, initial_T)
     C = initial_C;
     T = initial_T;
     singular_values = initial_singular_values();
+    singular_values_of_all_iterations = {singular_values};
     a = construct_a(beta);
 
     for iteration = 1:max_iterations
       singular_values_old = singular_values;
       [C, T, singular_values] = grow_lattice(C, T, a);
+      singular_values_of_all_iterations{end + 1} = singular_values;
 
       c = convergence(singular_values, singular_values_old);
 
@@ -122,6 +124,7 @@ function order_parameters = ising_2d(temperatures, varargin)
       display('Tolerance not reached.')
       display(c)
     end
+    display(singular_values)
   end
 
   function [C, T, singular_values] = grow_lattice(C, T, a)
