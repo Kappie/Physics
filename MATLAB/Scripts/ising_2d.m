@@ -110,6 +110,8 @@ function order_parameters = ising_2d(temperatures, varargin)
       c = convergence(singular_values, singular_values_old);
 
       if c < tolerance
+        sprintf(['Tolerance reached for temperature ', num2str(1/beta), ...
+          '. Number of iterations: ' num2str(iteration), '.\n'])
         break
       end
     end
