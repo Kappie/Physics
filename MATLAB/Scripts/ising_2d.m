@@ -46,6 +46,11 @@ function order_parameters = ising_2d(temperatures, varargin)
         T = random_T();
       end
 
+      if strcmp(tensor_initialization, 'physical')
+        C = physical_initial_C(betas(i));
+        T = physical_initial_T(betas(i));
+      end
+
       [C, T] = calculate_environment(betas(i), C, T);
       order_parameters(i) = order_parameter(betas(i), C, T);
     end
@@ -111,6 +116,7 @@ function order_parameters = ising_2d(temperatures, varargin)
       singular_values_old = singular_values;
       [C, T, singular_values] = grow_lattice(C, T, a);
       singular_values_of_all_iterations{end + 1} = singular_values;
+      display(singular_values)
 
       c = convergence(singular_values, singular_values_old);
 
@@ -124,7 +130,7 @@ function order_parameters = ising_2d(temperatures, varargin)
       display('Tolerance not reached.')
       display(c)
     end
-    display(singular_values)
+    % display(singular_values)
   end
 
   function [C, T, singular_values] = grow_lattice(C, T, a)
@@ -235,4 +241,19 @@ function order_parameters = ising_2d(temperatures, varargin)
     m = triu(m) + triu(m, 1)';
   end
 
+  function T = physical_initial_T(beta)
+    delta = zeros(2, 2, 2);
+    delta(1, 1, 1) = 1;
+    delta(2, 2, 2) = 1;
+    P = sqrtm(construct_Q(beta));
+    T = ncon({P, P, P, delta}, {[-1, 1], [-2, 2], [-3, 3], [1, 2, 3]});
+  end
+
+  function C = physical_initial_C(beta)
+    delta = zeros(2, 2);
+    delta(1, 1) = 1;
+    delta(2, 2) = 1;
+    P = sqrtm(construct_Q(beta));
+    C = ncon({P, P, delta}, {[-1, 1], [-2, 2], [1, 2]});
+  end
 end

@@ -2,17 +2,17 @@ function main
   clc;
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
-  temperatures = linspace(T_crit - .1, T_crit + .1, 10);
+  temperatures = linspace(T_crit - .3, T_crit + .3, 5);
 
   simulation = true;
   overwrite = true;
   plotting = true;
 
-  min_iterations = 400;
-  chi_values = [8];
+  min_iterations = 0;
+  chi_values = [4];
   max_iterations_values = [10000];
-  tolerance_values = [1];
-  tensor_initialization = 'adjusted_reverse';
+  tolerance_values = [1e-6];
+  tensor_initialization_values = {'random'};
   % max_iterations_values = [500];
 
   % chi_values = [2];
@@ -23,13 +23,15 @@ function main
     for chi = chi_values
       for tolerance = tolerance_values
         for max_iterations = max_iterations_values
+          for tensor_initialization = tensor_initialization_values
 
-          order_parameters = ising_2d(temperatures, 'chi', chi, 'chi_init', 2, ...
-            'tolerance', tolerance, 'max_iterations', max_iterations, ...
-            'min_iterations', min_iterations, 'tensor_initialization', tensor_initialization);
+            order_parameters = ising_2d(temperatures, 'chi', chi, 'chi_init', 2, ...
+              'tolerance', tolerance, 'max_iterations', max_iterations, ...
+              'min_iterations', min_iterations, 'tensor_initialization', tensor_initialization{1});
 
-          save_to_file([temperatures; order_parameters]', ...
-            suggested_file_name(chi, tolerance, max_iterations, tensor_initialization), overwrite);
+            save_to_file([temperatures; order_parameters]', ...
+              suggested_file_name(chi, tolerance, max_iterations, tensor_initialization{1}), overwrite);
+          end
         end
       end
     end
@@ -42,17 +44,18 @@ function main
     for chi = chi_values
       for tolerance = tolerance_values
         for max_iterations = max_iterations_values
-          file_name = suggested_file_name(chi, tolerance, max_iterations, tensor_initialization);
-          % Want to plot columns
-          data = dlmread(file_name);
-          plot(data(:, 1), data(:, 2), 'o--');
+          for tensor_initialization = tensor_initialization_values
+            file_name = suggested_file_name(chi, tolerance, max_iterations, tensor_initialization{1});
+            % Want to plot columns
+            data = dlmread(file_name);
+            plot(data(:, 1), data(:, 2), 'o--');
+          end
         end
       end
     end
 
-    legend(arrayfun(@num2str, chi_values, 'UniformOutput', false));
-
-
+    % legend(arrayfun(@num2str, chi_values, 'UniformOutput', false));
+    legend(tensor_initialization_values)
     line([T_crit, T_crit], [0, 1], 'LineStyle', '--');
     hold off;
   end
