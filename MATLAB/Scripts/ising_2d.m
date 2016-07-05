@@ -6,6 +6,7 @@ function order_parameters = ising_2d(temperatures, varargin)
   default_max_iterations = 200;
   default_min_iterations = 0;
   default_tensor_initialization = 'random';
+  default_traversal_order = 'standard'
 
   addRequired(p, 'temperatures');
   addParameter(p, 'chi', default_chi);
@@ -14,6 +15,7 @@ function order_parameters = ising_2d(temperatures, varargin)
   addParameter(p, 'max_iterations', default_max_iterations);
   addParameter(p, 'min_iterations', default_min_iterations);
   addParameter(p, 'tensor_initialization', default_tensor_initialization);
+  addParameter(p, 'traversal_order', default_traversal_order);
 
   parse(p, temperatures, varargin{:});
 
@@ -23,10 +25,12 @@ function order_parameters = ising_2d(temperatures, varargin)
   max_iterations = p.Results.max_iterations;
   min_iterations = p.Results.min_iterations;
   tensor_initialization = p.Results.tensor_initialization;
+  traversal_order = p.Results.traversal_order;
 
   J = 1;
 
   betas = 1./temperatures;
+  % initial_values = zeros(numel(betas), 1);
   order_parameters = run_simulation();
 
 
@@ -36,24 +40,32 @@ function order_parameters = ising_2d(temperatures, varargin)
     C = random_C();
     T = random_T();
 
-    % Loop in reverse to not get stuck in magnetized state?
-    for i = number_of_points:-1:1
-    % for i = 1:number_of_points
+    % If I start in the disordered phase, I never get out of it.
+    for i = 1:number_of_points
+      if strcmp(traversal_order, 'reverse')
+        i = number_of_points - i + 1;
+      end
       % If not using random initialization, the converged environment tensors
       % T, C at the previously calculated beta are used.
       if strcmp(tensor_initialization, 'random')
         C = random_C();
         T = random_T();
-      end
 
-      if strcmp(tensor_initialization, 'physical')
+      elseif strcmp(tensor_initialization, 'physical')
         C = physical_initial_C(betas(i));
         T = physical_initial_T(betas(i));
       end
 
+      % Here, we perform one growth step, and truncate C and T back to chi_init, so that we
+      % do not start with huge matrices that influence the convergence.
+      % [C, T, ~] = grow_lattice(C, T, construct_a(betas(i)), chi_init);
+      % initial_values(i) = C(2, 2);
       [C, T] = calculate_environment(betas(i), C, T);
       order_parameters(i) = order_parameter(betas(i), C, T);
     end
+
+    % plot(1./betas, initial_values, 'o--')
+    % display(initial_values)
   end
 
   function m = order_parameter(beta, C, T)
@@ -108,21 +120,24 @@ function order_parameters = ising_2d(temperatures, varargin)
   function [C, T] = calculate_environment(beta, initial_C, initial_T)
     C = initial_C;
     T = initial_T;
+
+    display('C init: ')
+    display(C)
+
     singular_values = initial_singular_values();
     singular_values_of_all_iterations = {singular_values};
     a = construct_a(beta);
 
     for iteration = 1:max_iterations
       singular_values_old = singular_values;
-      [C, T, singular_values] = grow_lattice(C, T, a);
+      [C, T, singular_values] = grow_lattice(C, T, a, chi);
       singular_values_of_all_iterations{end + 1} = singular_values;
-      display(singular_values)
-
       c = convergence(singular_values, singular_values_old);
+      % display(singular_values)
 
       if c < tolerance && iteration >= min_iterations
-        sprintf(['Tolerance reached for temperature ', num2str(1/beta), ...
-          '. Number of iterations: ' num2str(iteration), '.\n'])
+        % sprintf(['Tolerance reached for temperature ', num2str(1/beta), ...
+        %   '. Number of iterations: ' num2str(iteration), '.\n'])
         break
       end
     end
@@ -130,10 +145,14 @@ function order_parameters = ising_2d(temperatures, varargin)
       display('Tolerance not reached.')
       display(c)
     end
-    % display(singular_values)
+
+    % display('final singular values: ')
+    % celldisp(singular_values_of_all_iterations(end))
+    % display('temperature')
+    % display(1/beta)
   end
 
-  function [C, T, singular_values] = grow_lattice(C, T, a)
+  function [C, T, singular_values] = grow_lattice(C, T, a, chi)
     % Final order is specified so that the new tensor is ordered according to
     % [d, chi, c, chi], with the pairs of c, chi corresponding to what will be the reshaped
     % legs of the new C.
