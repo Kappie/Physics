@@ -45,7 +45,7 @@ function order_parameters = ising_2d(temperatures, varargin)
       if strcmp(traversal_order, 'reverse')
         i = number_of_points - i + 1;
       end
-      % If not using random initialization, the converged environment tensors
+      % If not using random or physical initialization, the converged environment tensors
       % T, C at the previously calculated beta are used.
       if strcmp(tensor_initialization, 'random')
         C = random_C();
@@ -60,6 +60,7 @@ function order_parameters = ising_2d(temperatures, varargin)
       % do not start with huge matrices that influence the convergence.
       % [C, T, ~] = grow_lattice(C, T, construct_a(betas(i)), chi_init);
       % initial_values(i) = C(2, 2);
+
       [C, T] = calculate_environment(betas(i), C, T);
       order_parameters(i) = order_parameter(betas(i), C, T);
     end
@@ -133,7 +134,7 @@ function order_parameters = ising_2d(temperatures, varargin)
       [C, T, singular_values] = grow_lattice(C, T, a, chi);
       singular_values_of_all_iterations{end + 1} = singular_values;
       c = convergence(singular_values, singular_values_old);
-      % display(singular_values)
+      display(singular_values)
 
       if c < tolerance && iteration >= min_iterations
         % sprintf(['Tolerance reached for temperature ', num2str(1/beta), ...
