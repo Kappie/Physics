@@ -10,12 +10,12 @@ function main
   plotting = true;
 
   min_iterations_values = [0];
-  chi_values = [24];
+  chi_values = [16];
   max_iterations_values = [5000];
-  tolerance_values = [1e-14];
+  tolerance_values = [1e-10];
   chi_init_values = [2];
-  tensor_initialization_values = {'adjusted_reverse'};
-  traversal_order = 'reverse';
+  tensor_initialization_values = {'physical'};
+  traversal_order = 'standard';
   % max_iterations_values = [500];
 
   % chi_values = [2];

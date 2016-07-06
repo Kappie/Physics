@@ -6,7 +6,7 @@ function order_parameters = ising_2d(temperatures, varargin)
   default_max_iterations = 200;
   default_min_iterations = 0;
   default_tensor_initialization = 'random';
-  default_traversal_order = 'standard'
+  default_traversal_order = 'standard';
 
   addRequired(p, 'temperatures');
   addParameter(p, 'chi', default_chi);
@@ -30,9 +30,7 @@ function order_parameters = ising_2d(temperatures, varargin)
   J = 1;
 
   betas = 1./temperatures;
-  % initial_values = zeros(numel(betas), 1);
   order_parameters = run_simulation();
-
 
   function order_parameters = run_simulation()
     number_of_points = numel(betas);
@@ -52,28 +50,19 @@ function order_parameters = ising_2d(temperatures, varargin)
         T = random_T();
 
       elseif strcmp(tensor_initialization, 'physical')
-        C = physical_initial_C(betas(i));
-        T = physical_initial_T(betas(i));
+        C = spin_up_initial_C(betas(i));
+        T = spin_up_initial_T(betas(i));
       end
-
-      % Here, we perform one growth step, and truncate C and T back to chi_init, so that we
-      % do not start with huge matrices that influence the convergence.
-      % [C, T, ~] = grow_lattice(C, T, construct_a(betas(i)), chi_init);
-      % initial_values(i) = C(2, 2);
 
       [C, T] = calculate_environment(betas(i), C, T);
       order_parameters(i) = order_parameter(betas(i), C, T);
     end
-
-    % plot(1./betas, initial_values, 'o--')
-    % display(initial_values)
   end
 
   function m = order_parameter(beta, C, T)
     m = abs(magnetization(beta, C, T));
   end
 
-  % Compute magnetization using converged environment tensors.
   function m = magnetization(beta, C, T)
     Z = partition_function(beta, C, T);
     unnormalized_magnetization = attach_environment(construct_b(beta), C, T);
@@ -98,14 +87,6 @@ function order_parameters = ising_2d(temperatures, varargin)
   function result = attach_environment(tensor, C, T)
     env = environment(C, T);
     result = ncon({tensor, env}, {[1 2 3 4], [1 2 3 4]});
-    %%%
-    %%% Different way of calculating environment: gives the same result as current method.
-    %%%
-    % result = ncon({tensor, T, T, T, T}, ...
-    %   {[1, 2, 3, 4], [1, -1, -2], [2, -3, -4], [3, -5, -6], [4, -7, -8]});
-    % % Attach C.
-    % result = ncon({result, C, C, C, C}, ...
-    %   {[1, 2, 3, 4, 5, 6, 7, 8], [2, 3], [4, 5], [6, 7], [8, 1]});
   end
 
   function environment = environment(C, T)
@@ -132,7 +113,7 @@ function order_parameters = ising_2d(temperatures, varargin)
       singular_values_of_all_iterations{end + 1} = singular_values;
       c = convergence(singular_values, singular_values_old);
 
-      display(singular_values)
+      % display(singular_values)
 
       if c < tolerance && iteration >= min_iterations
         % sprintf(['Tolerance reached for temperature ', num2str(1/beta), ...
@@ -144,11 +125,6 @@ function order_parameters = ising_2d(temperatures, varargin)
       display('Tolerance not reached.')
       display(c)
     end
-
-    % display('final singular values: ')
-    % celldisp(singular_values_of_all_iterations(end))
-    % display('temperature')
-    % display(1/beta)
   end
 
   function [C, T, singular_values] = grow_lattice(C, T, a, chi)
@@ -208,16 +184,20 @@ function order_parameters = ising_2d(temperatures, varargin)
     Q = [exp(beta*J) exp(-beta*J); exp(-beta*J) exp(beta*J)];
   end
 
-  function a = construct_a(beta)
-    delta = construct_delta();
+  function P = construct_P(beta)
     % We need square root of a matrix here, not the square root of the elements!
     P = sqrtm(construct_Q(beta));
+  end
+
+  function a = construct_a(beta)
+    delta = construct_delta();
+    P = construct_P(beta);
     a = ncon({P, P, P, P, delta}, {[-1, 1], [-2, 2], [-3, 3], [-4, 4], [1, 2, 3, 4]});
   end
 
   function b = construct_b(beta)
     g = construct_g();
-    P = sqrtm(construct_Q(beta));
+    P = construct_P(beta);
     b = ncon({P, P, P, P, g}, {[-1, 1], [-2, 2], [-3, 3], [-4, 4], [1, 2, 3, 4]});
   end
 
@@ -230,6 +210,18 @@ function order_parameters = ising_2d(temperatures, varargin)
   function g = construct_g()
     g = construct_delta();
     g(2, 2, 2, 2) = -1;
+  end
+
+  function delta = corner_delta()
+    delta = zeros(2, 2);
+    delta(1, 1) = 1;
+    delta(2, 2) = 1;
+  end
+
+  function delta = edge_delta()
+    delta = zeros(2, 2, 2);
+    delta(1, 1, 1) = 1;
+    delta(2, 2, 2) = 2;
   end
 
   function s = initial_singular_values()
@@ -260,18 +252,29 @@ function order_parameters = ising_2d(temperatures, varargin)
   end
 
   function T = physical_initial_T(beta)
-    delta = zeros(2, 2, 2);
-    delta(1, 1, 1) = 1;
-    delta(2, 2, 2) = 1;
-    P = sqrtm(construct_Q(beta));
+    delta = edge_delta();
+    P = construct_P(beta);
     T = ncon({P, P, P, delta}, {[-1, 1], [-2, 2], [-3, 3], [1, 2, 3]});
   end
 
   function C = physical_initial_C(beta)
-    delta = zeros(2, 2);
-    delta(1, 1) = 1;
-    delta(2, 2) = 1;
-    P = sqrtm(construct_Q(beta));
+    delta = corner_delta();
+    P = construct_P(beta);
     C = ncon({P, P, delta}, {[-1, 1], [-2, 2], [1, 2]});
+  end
+
+  % This corresponds to a corner with an upspin. Why exactly?
+  function C = spin_up_initial_C(beta)
+    spin_up_tensor = corner_delta();
+    spin_up_tensor(2, 2) = 0;
+    P = construct_P(beta);
+    C = ncon({P, P, spin_up_tensor}, {[-1 1], [-2 2], [1 2]});
+  end
+
+  function T = spin_up_initial_T(beta)
+    spin_up_tensor = edge_delta();
+    spin_up_tensor(2, 2, 2) = 0;
+    P = construct_P(beta);
+    T = ncon({P, P, P, spin_up_tensor}, {[-1 1], [-2 2], [-3 3], [1 2 3]});
   end
 end
