@@ -9,10 +9,10 @@ function main
   overwrite = true;
   plotting = true;
 
-  min_iterations_values = [200];
-  chi_values = [2, 4, 6];
-  max_iterations_values = [1000000000];
-  tolerance_values = [1e-12];
+  min_iterations_values = [0];
+  chi_values = [24];
+  max_iterations_values = [5000];
+  tolerance_values = [1e-14];
   chi_init_values = [2];
   tensor_initialization_values = {'adjusted_reverse'};
   traversal_order = 'reverse';

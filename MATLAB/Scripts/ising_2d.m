@@ -122,9 +122,6 @@ function order_parameters = ising_2d(temperatures, varargin)
     C = initial_C;
     T = initial_T;
 
-    display('C init: ')
-    display(C)
-
     singular_values = initial_singular_values();
     singular_values_of_all_iterations = {singular_values};
     a = construct_a(beta);
@@ -134,6 +131,7 @@ function order_parameters = ising_2d(temperatures, varargin)
       [C, T, singular_values] = grow_lattice(C, T, a, chi);
       singular_values_of_all_iterations{end + 1} = singular_values;
       c = convergence(singular_values, singular_values_old);
+
       display(singular_values)
 
       if c < tolerance && iteration >= min_iterations
