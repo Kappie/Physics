@@ -69,6 +69,10 @@ function order_parameters = ising_2d(temperatures, varargin)
     m = unnormalized_magnetization / Z;
   end
 
+  function f = free_energy_per_site(beta, C, T)
+    f = 'hoi';
+  end
+
   function Z = partition_function(beta, C, T)
     Z = attach_environment(construct_a(beta), C, T);
   end
