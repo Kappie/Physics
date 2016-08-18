@@ -38,18 +38,21 @@ function order_parameters = ising_2d(temperatures, varargin)
     C = random_C();
     T = random_T();
 
-    % If I start in the disordered phase, I never get out of it.
     for i = 1:number_of_points
       if strcmp(traversal_order, 'reverse')
         i = number_of_points - i + 1;
       end
-      % If not using random or physical initialization, the converged environment tensors
+      % If not using specific initialization, the converged environment tensors
       % T, C at the previously calculated beta are used.
       if strcmp(tensor_initialization, 'random')
         C = random_C();
         T = random_T();
 
       elseif strcmp(tensor_initialization, 'physical')
+        C = physical_initial_C(betas(i))
+        T = physical_initial_T(betas(i));
+
+      elseif strcmp(tensor_initialization, 'spin-up')
         C = spin_up_initial_C(betas(i));
         T = spin_up_initial_T(betas(i));
       end
@@ -109,6 +112,8 @@ function order_parameters = ising_2d(temperatures, varargin)
 
     singular_values = initial_singular_values();
     singular_values_of_all_iterations = {singular_values};
+    convergences = {};
+
     a = construct_a(beta);
 
     for iteration = 1:max_iterations
@@ -116,8 +121,7 @@ function order_parameters = ising_2d(temperatures, varargin)
       [C, T, singular_values] = grow_lattice(C, T, a, chi);
       singular_values_of_all_iterations{end + 1} = singular_values;
       c = convergence(singular_values, singular_values_old);
-
-      % display(singular_values)
+      convergences{end + 1} = c;
 
       if c < tolerance && iteration >= min_iterations
         % sprintf(['Tolerance reached for temperature ', num2str(1/beta), ...
@@ -129,6 +133,11 @@ function order_parameters = ising_2d(temperatures, varargin)
       display('Tolerance not reached.')
       display(c)
     end
+
+    data_dir = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/convergences/';
+    file_name = ['convergences_chi' num2str(chi) 'T' num2str(1/beta) '.dat'];
+    name = fullfile(data_dir, file_name);
+    save_to_file(cell2mat(convergences)', name, true);
   end
 
   function [C, T, singular_values] = grow_lattice(C, T, a, chi)

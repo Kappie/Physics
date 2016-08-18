@@ -3,19 +3,20 @@ function main
   format long;
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
-  temperatures = linspace(T_crit - .1, T_crit + .1, 10);
+  temperatures = linspace(T_crit - .1, T_crit + .1, 5);
+  % temperatures = [T_crit - 0.1, T_crit - 0.1, 3]
 
   simulation = true;
-  overwrite = true;
-  plotting = true;
+  overwrite = false;
+  plotting = false;
 
   min_iterations_values = [0];
-  chi_values = [16];
-  max_iterations_values = [5000];
-  tolerance_values = [1e-10];
+  chi_values = [8];
+  max_iterations_values = [10000];
+  tolerance_values = [1e-30];
   chi_init_values = [2];
-  tensor_initialization_values = {'physical'};
-  traversal_order = 'standard';
+  tensor_initialization_values = {'adjusted'};
+  traversal_order = 'reverse';
   % max_iterations_values = [500];
 
   % chi_values = [2];
@@ -55,35 +56,7 @@ function main
     end
   end
 
-  % if plotting
-  %
-  %   figure;
-  %   hold on;
-  %   for chi = chi_values
-  %     for tolerance = tolerance_values
-  %       for max_iterations = max_iterations_values
-  %         for tensor_initialization = tensor_initialization_values
-  %           file_name = suggested_file_name(chi, tolerance, max_iterations, tensor_initialization{1});
-  %           % Want to plot columns
-  %           data = dlmread(file_name);
-  %           plot(data(:, 1), data(:, 2), 'o--');
-  %         end
-  %       end
-  %     end
-  %   end
-
-    % legend(tensor_initialization_values)
-    % line([T_crit, T_crit], [0, 1], 'LineStyle', '--');
-  % end
-
-  % errors = abs(order_parameters - arrayfun(@exact_order_parameter, 1./temperatures))
-  % exact_order_parameters = arrayfun(@exact_order_parameter, 1./temperatures);
-  % errors = abs(order_parameters - exact_order_parameters);
-
-  % legend(arrayfun(@num2str, chi_init_values, 'UniformOutput', false));
   if plotting
-    % legend({'chi_0 = 1', 'chi_0 = 2', 'chi_0 = 4', 'chi_0 = 6'});
-    % title('Order parameter for chi = 20 and different values of chi_0');
     xlabel('T');
     ylabel('|m|');
     line([T_crit, T_crit], [0, 1], 'LineStyle', '--');
