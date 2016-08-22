@@ -72,23 +72,27 @@ function order_parameters = ising_2d(temperatures, varargin)
     m = unnormalized_magnetization / Z;
   end
 
+  % How does this follow from definition <s_i s_j> ?
   function f = free_energy_per_site(beta, C, T)
-    f = 'hoi';
+    Z = partition_function(beta, C, T);
+    four_corners = ncon({C, C, C, C}, {[1 2], [2 3], [3 4], [4 1]});
+    two_rows = ncon({C, T, C, C, T, C}, {[1 2], [3 2 4], [4 5], [5 6], [3 6 7], [7 1]});
+    f = Z * four_corners / two_rows^2;
   end
 
   function Z = partition_function(beta, C, T)
     Z = attach_environment(construct_a(beta), C, T);
   end
 
-  function result = compare_environments(beta, C, T)
-    a = construct_a(beta);
-    z1 = attach_environment(a, C, T)
-
-    env = environment(C, T);
-    z2 = ncon({a, env}, {[1 2 3 4], [1 2 3 4]})
-
-    result = 1;
-  end
+  % function result = compare_environments(beta, C, T)
+  %   a = construct_a(beta);
+  %   z1 = attach_environment(a, C, T)
+  %
+  %   env = environment(C, T);
+  %   z2 = ncon({a, env}, {[1 2 3 4], [1 2 3 4]})
+  %
+  %   result = 1;
+  % end
 
   % Expects either a or b.
   function result = attach_environment(tensor, C, T)
@@ -134,17 +138,17 @@ function order_parameters = ising_2d(temperatures, varargin)
       display(c)
     end
 
-    figure;
-    xlabel('iterations')
-    title(['Convergence and order parameter at T = ' num2str(1/beta) ' chi = ' num2str(chi)])
-
-    yyaxis left;
-    semilogy(cell2mat(convergences));
-    ylabel('convergence')
-
-    yyaxis right;
-    plot(cell2mat(order_parameters));
-    ylabel('|m|')
+    % figure;
+    % xlabel('iterations')
+    % title(['Convergence and order parameter at T = ' num2str(1/beta) ' chi = ' num2str(chi)])
+    %
+    % yyaxi s left;
+    % semilogy(cell2mat(convergences));
+    % ylabel('convergence')
+    %
+    % yyaxis right;
+    % plot(cell2mat(order_parameters));
+    % ylabel('|m|')
 
     % data_dir = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/convergences/';
     % file_name = ['convergences_chi' num2str(chi) 'T' num2str(1/beta) '.dat'];
@@ -154,7 +158,7 @@ function order_parameters = ising_2d(temperatures, varargin)
 
   function [C, T, singular_values] = grow_lattice(C, T, a, chi)
     % Final order is specified so that the new tensor is ordered according to
-    % [d, chi, c, chi], with the pairs of c, chi corresponding to what will be the reshaped
+    % [d, chi, d, chi], with the pairs of d, chi corresponding to what will be the reshaped
     % legs of the new C.
     C = ncon({C, T, T, a}, {[1, 2], [3, 1, -1], [4, 2, -2], [3, -3, -4, 4]}, ...
     [1, 2, 3, 4], [-3 -1 -4 -2]);
@@ -253,6 +257,7 @@ function order_parameters = ising_2d(temperatures, varargin)
     s = ones(chi, 1) / chi;
   end
 
+  % Convention is: physical dimension first.
   function T = random_T()
     T = symmetrize_T(rand(2, chi_init, chi_init));
   end
