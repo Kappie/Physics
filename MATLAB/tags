@@ -1,0 +1,25 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+applyFinalOrder	Library/ncon.m	/^function legLinks = applyFinalOrder(legLinks,finalOrder)$/;"	f
+argument_parsing	Scripts/argument_parsing.m	/^function argument_parsing(temperatures, varargin)$/;"	f
+checkInputs	Library/ncon.m	/^function [sequence legLinks] = checkInputs(tensorList,legLinks,finalOrder,sequence)$/;"	f
+doTrace	Library/ncon.m	/^function B = doTrace(A,legLabels,tracedIndices)$/;"	f
+exact_order_parameter	Scripts/exact_order_parameter.m	/^function m = exact_order_parameter(beta)$/;"	f
+findInSequence	Library/ncon.m	/^function [rtnIndices sequence] = findInSequence(indices,sequence,tensorList,legLinks,tensors)$/;"	f
+ising_2d	Scripts/ising_2d.m	/^function order_parameters = ising_2d(temperatures, varargin)$/;"	f
+lreshape	Library/lreshape.m	/^function [T,dl,dr]=lreshape(T,llegs,rlegs)$/;"	f
+main	Scripts/main.m	/^function main$/;"	f
+ncon	Library/ncon.m	/^function tensor = ncon(tensorList,legLinks,sequence,finalOrder)$/;"	f
+performContraction	Library/ncon.m	/^function [tensorList legLinks] = performContraction(tensorList,legLinks,sequence)$/;"	f
+plot_order_parameter	Scripts/plot_order_parameter.m	/^function plot_order_parameter(temperatures, order_parameter_set)$/;"	f
+save_to_file	Scripts/save_to_file.m	/^function save_to_file(columns, path, overwrite)$/;"	f
+svdsabsorb	Library/svdsabsorb.m	/^function [u,s,v]=svdsabsorb(T,n,mode,cut)$/;"	f
+tcontract	Library/ncon.m	/^function [tensor legs] = tcontract(T1,T2,legs1,legs2,contractLegs)$/;"	f
+tensorsvd	Library/tensorsvd.m	/^function [u,s,v]=tensorsvd(T,ll,rl,n,absorb,cut)$/;"	f
+undoreshape	Library/undoreshape.m	/^function T=undoreshape(T,dl,dr)$/;"	f
+warn_suboptimal	Library/ncon.m	/^function warnedLegs = warn_suboptimal(doing,couldDo,mode,warnedLegs,legList,legDims)$/;"	f
+zisOuterProduct	Library/ncon.m	/^function [tensorList legLinks sequence warnedLegs] = zisOuterProduct(tensorList,legLinks,sequence,warnedLegs)$/;"	f

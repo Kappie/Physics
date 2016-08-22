@@ -1,0 +1,7 @@
+convergences_chi4T2.1692.dat
+convergences_chi4T2.2192.dat
+convergences_chi4T2.2692.dat
+convergences_chi4T2.3192.dat
+convergences_chi4T2.3692.dat
+lol.txt
+plot_convergences.gp

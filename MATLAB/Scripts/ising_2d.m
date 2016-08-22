@@ -113,6 +113,7 @@ function order_parameters = ising_2d(temperatures, varargin)
     singular_values = initial_singular_values();
     singular_values_of_all_iterations = {singular_values};
     convergences = {};
+    order_parameters = {};
 
     a = construct_a(beta);
 
@@ -122,10 +123,9 @@ function order_parameters = ising_2d(temperatures, varargin)
       singular_values_of_all_iterations{end + 1} = singular_values;
       c = convergence(singular_values, singular_values_old);
       convergences{end + 1} = c;
+      order_parameters{end + 1} = order_parameter(beta, C, T);
 
       if c < tolerance && iteration >= min_iterations
-        % sprintf(['Tolerance reached for temperature ', num2str(1/beta), ...
-        %   '. Number of iterations: ' num2str(iteration), '.\n'])
         break
       end
     end
@@ -134,10 +134,22 @@ function order_parameters = ising_2d(temperatures, varargin)
       display(c)
     end
 
-    data_dir = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/convergences/';
-    file_name = ['convergences_chi' num2str(chi) 'T' num2str(1/beta) '.dat'];
-    name = fullfile(data_dir, file_name);
-    save_to_file(cell2mat(convergences)', name, true);
+    figure;
+    xlabel('iterations')
+    title(['Convergence and order parameter at T = ' num2str(1/beta) ' chi = ' num2str(chi)])
+
+    yyaxis left;
+    semilogy(cell2mat(convergences));
+    ylabel('convergence')
+
+    yyaxis right;
+    plot(cell2mat(order_parameters));
+    ylabel('|m|')
+
+    % data_dir = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/convergences/';
+    % file_name = ['convergences_chi' num2str(chi) 'T' num2str(1/beta) '.dat'];
+    % name = fullfile(data_dir, file_name);
+    % save_to_file(cell2mat(convergences)', name, true);
   end
 
   function [C, T, singular_values] = grow_lattice(C, T, a, chi)

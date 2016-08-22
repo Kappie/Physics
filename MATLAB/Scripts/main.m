@@ -11,17 +11,12 @@ function main
   plotting = false;
 
   min_iterations_values = [0];
-  chi_values = [8];
-  max_iterations_values = [10000];
-  tolerance_values = [1e-30];
+  chi_values = [16];
+  max_iterations_values = [60000];
+  tolerance_values = [10e-30];
   chi_init_values = [2];
   tensor_initialization_values = {'adjusted'};
   traversal_order = 'reverse';
-  % max_iterations_values = [500];
-
-  % chi_values = [2];
-  % tolerance_values = [1e-2];
-  % max_iterations_values = [100];
 
   if plotting
     figure;
