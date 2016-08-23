@@ -13,7 +13,7 @@ function main
   min_iterations_values = [0];
   chi_values = [4];
   max_iterations_values = [60000];
-  tolerance_values = [1e-3];
+  tolerance_values = [1e-2];
   chi_init_values = [2];
   tensor_initialization_values = {'spin-up'};
   traversal_order = 'standard';

@@ -27,6 +27,7 @@ function order_parameters = ising_2d(temperatures, varargin)
   tensor_initialization = p.Results.tensor_initialization;
   traversal_order = p.Results.traversal_order;
 
+  database = 'converged_tensors.db';
   J = 1;
 
   betas = 1./temperatures;
@@ -63,21 +64,31 @@ function order_parameters = ising_2d(temperatures, varargin)
   end
 
   function [C, T] = calculate_environment_if_it_does_not_exist(beta, initial_C, initial_T)
-    % Returns converged environment tensors C and T if they are saved on disk for a
+    % Returns converged environment tensors C and T if they are saved in the database for a
     % specific T, chi, tolerance. Note that we do not care about possible differences
     % in initial tensors.
-    file_name = converged_tensor_file_name(1/beta, chi, tolerance);
-    % 2 is a code that means the string is a file name, cf. 1 for a variable name, etc.
-    if exist(file_name, 'file') == 2
-      % Note that C and T get assigned with this command.
-      load(file_name, 'C', 'T');
-      display('I loaded a file name :DDD')
+
+    % Database schema: (c BLOB, t BLOB, temperature NUMERIC, chi NUMERIC, tolerance NUMERIC)
+    sqlite3.open(database);
+    result = sqlite3.execute('SELECT C, T FROM tensors where temperature = ? AND chi = ? AND tolerance = ? LIMIT 1', ...
+      1/beta, chi, tolerance);
+
+    if isempty(result)
+      [C, T, converged] = calculate_environment(beta, initial_C, initial_T);
+      if converged
+        serialized_C = getByteStreamFromArray(C);
+        serialized_T = getByteStreamFromArray(T);
+        sqlite3.execute('INSERT INTO tensors VALUES (?, ?, ?, ?, ?)', ...
+          serialized_C, serialized_T, 1/beta, chi, tolerance);
+      end
     else
-      [C, T] = calculate_environment(beta, initial_C, initial_T);
+      C = getArrayFromByteStream(result.c);
+      T = getArrayFromByteStream(result.t);
+      display('I loaded data from the DB :D')
     end
   end
 
-  function [C, T] = calculate_environment(beta, initial_C, initial_T)
+  function [C, T, converged] = calculate_environment(beta, initial_C, initial_T)
     C = initial_C;
     T = initial_T;
 
@@ -97,14 +108,12 @@ function order_parameters = ising_2d(temperatures, varargin)
       order_parameters{end + 1} = order_parameter(beta, C, T);
 
       if c < tolerance && iteration >= min_iterations
-        save_converged_tensors_to_file(C, T, 1/beta, chi, tolerance);
+        converged = true;
         break
       end
     end
     if c > tolerance
-      display('Tolerance not reached. Not saving to file.')
-      display(['for T = ' num2str(1/beta) ', chi = ' num2str(chi) ]);
-      display(c)
+      converged = false;
     end
 
     % figure;
