@@ -30,9 +30,9 @@ function order_parameters = ising_2d(temperatures, varargin)
   J = 1;
 
   betas = 1./temperatures;
-  order_parameters = run_simulation();
+  order_parameters = calculate_order_parameters();
 
-  function order_parameters = run_simulation()
+  function order_parameters = calculate_order_parameters()
     number_of_points = numel(betas);
     order_parameters = zeros(1, number_of_points);
     C = random_C();
@@ -48,18 +48,81 @@ function order_parameters = ising_2d(temperatures, varargin)
         C = random_C();
         T = random_T();
 
-      elseif strcmp(tensor_initialization, 'physical')
-        C = physical_initial_C(betas(i))
-        T = physical_initial_T(betas(i));
+      elseif strcmp(tensor_initialization, 'symmetric')
+        C = symmetric_initial_C(betas(i))
+        T = symmetric_initial_T(betas(i));
 
       elseif strcmp(tensor_initialization, 'spin-up')
         C = spin_up_initial_C(betas(i));
         T = spin_up_initial_T(betas(i));
       end
 
-      [C, T] = calculate_environment(betas(i), C, T);
+      [C, T] = calculate_environment_if_it_does_not_exist(betas(i), C, T);
       order_parameters(i) = order_parameter(betas(i), C, T);
     end
+  end
+
+  function [C, T] = calculate_environment_if_it_does_not_exist(beta, initial_C, initial_T)
+    % Returns converged environment tensors C and T if they are saved on disk for a
+    % specific T, chi, tolerance. Note that we do not care about possible differences
+    % in initial tensors.
+    file_name = converged_tensor_file_name(1/beta, chi, tolerance);
+    % 2 is a code that means the string is a file name, cf. 1 for a variable name, etc.
+    if exist(file_name, 'file') == 2
+      % Note that C and T get assigned with this command.
+      load(file_name, 'C', 'T');
+      display('I loaded a file name :DDD')
+    else
+      [C, T] = calculate_environment(beta, initial_C, initial_T);
+    end
+  end
+
+  function [C, T] = calculate_environment(beta, initial_C, initial_T)
+    C = initial_C;
+    T = initial_T;
+
+    singular_values = initial_singular_values();
+    singular_values_of_all_iterations = {singular_values};
+    convergences = {};
+    order_parameters = {};
+
+    a = construct_a(beta);
+
+    for iteration = 1:max_iterations
+      singular_values_old = singular_values;
+      [C, T, singular_values] = grow_lattice(C, T, a, chi);
+      singular_values_of_all_iterations{end + 1} = singular_values;
+      c = convergence(singular_values, singular_values_old);
+      convergences{end + 1} = c;
+      order_parameters{end + 1} = order_parameter(beta, C, T);
+
+      if c < tolerance && iteration >= min_iterations
+        save_converged_tensors_to_file(C, T, 1/beta, chi, tolerance);
+        break
+      end
+    end
+    if c > tolerance
+      display('Tolerance not reached. Not saving to file.')
+      display(['for T = ' num2str(1/beta) ', chi = ' num2str(chi) ]);
+      display(c)
+    end
+
+    % figure;
+    % xlabel('iterations')
+    % title(['Convergence and order parameter at T = ' num2str(1/beta) ' chi = ' num2str(chi)])
+    %
+    % yyaxi s left;
+    % semilogy(cell2mat(convergences));
+    % ylabel('convergence')
+    %
+    % yyaxis right;
+    % plot(cell2mat(order_parameters));
+    % ylabel('|m|')
+
+    % data_dir = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/convergences/';
+    % file_name = ['convergences_chi' num2str(chi) 'T' num2str(1/beta) '.dat'];
+    % name = fullfile(data_dir, file_name);
+    % save_to_file(cell2mat(convergences)', name, true);
   end
 
   function m = order_parameter(beta, C, T)
@@ -110,51 +173,7 @@ function order_parameters = ising_2d(temperatures, varargin)
     environment = ncon({half, half}, {[-1 -2 1 2], [-3 -4 2 1]});
   end
 
-  function [C, T] = calculate_environment(beta, initial_C, initial_T)
-    C = initial_C;
-    T = initial_T;
 
-    singular_values = initial_singular_values();
-    singular_values_of_all_iterations = {singular_values};
-    convergences = {};
-    order_parameters = {};
-
-    a = construct_a(beta);
-
-    for iteration = 1:max_iterations
-      singular_values_old = singular_values;
-      [C, T, singular_values] = grow_lattice(C, T, a, chi);
-      singular_values_of_all_iterations{end + 1} = singular_values;
-      c = convergence(singular_values, singular_values_old);
-      convergences{end + 1} = c;
-      order_parameters{end + 1} = order_parameter(beta, C, T);
-
-      if c < tolerance && iteration >= min_iterations
-        break
-      end
-    end
-    if c > tolerance
-      display('Tolerance not reached.')
-      display(c)
-    end
-
-    % figure;
-    % xlabel('iterations')
-    % title(['Convergence and order parameter at T = ' num2str(1/beta) ' chi = ' num2str(chi)])
-    %
-    % yyaxi s left;
-    % semilogy(cell2mat(convergences));
-    % ylabel('convergence')
-    %
-    % yyaxis right;
-    % plot(cell2mat(order_parameters));
-    % ylabel('|m|')
-
-    % data_dir = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/convergences/';
-    % file_name = ['convergences_chi' num2str(chi) 'T' num2str(1/beta) '.dat'];
-    % name = fullfile(data_dir, file_name);
-    % save_to_file(cell2mat(convergences)', name, true);
-  end
 
   function [C, T, singular_values] = grow_lattice(C, T, a, chi)
     % Final order is specified so that the new tensor is ordered according to
@@ -281,13 +300,13 @@ function order_parameters = ising_2d(temperatures, varargin)
     m = triu(m) + triu(m, 1)';
   end
 
-  function T = physical_initial_T(beta)
+  function T = symmetric_initial_T(beta)
     delta = edge_delta();
     P = construct_P(beta);
     T = ncon({P, P, P, delta}, {[-1, 1], [-2, 2], [-3, 3], [1, 2, 3]});
   end
 
-  function C = physical_initial_C(beta)
+  function C = symmetric_initial_C(beta)
     delta = corner_delta();
     P = construct_P(beta);
     C = ncon({P, P, delta}, {[-1, 1], [-2, 2], [1, 2]});
@@ -307,4 +326,15 @@ function order_parameters = ising_2d(temperatures, varargin)
     P = construct_P(beta);
     T = ncon({P, P, P, spin_up_tensor}, {[-1 1], [-2 2], [-3 3], [1 2 3]});
   end
+end
+
+function name = converged_tensor_file_name(temperature, chi, tolerance)
+  data_folder = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/ConvergedTensors/';
+  file_name = ['T', num2str(temperature), '_chi', num2str(chi), '_tolerance', num2str(tolerance, '%.2e'), '.mat'];
+  name = fullfile(data_folder, file_name);
+end
+
+function save_converged_tensors_to_file(C, T, temperature, chi, tolerance)
+  file_name = converged_tensor_file_name(temperature, chi, tolerance);
+  save(file_name, 'C', 'T');
 end

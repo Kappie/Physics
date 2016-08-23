@@ -3,20 +3,20 @@ function main
   format long;
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
-  temperatures = linspace(T_crit - .1, T_crit + .1, 5);
+  temperatures = linspace(T_crit - .07, T_crit + .07, 9);
   % temperatures = [T_crit - 0.1, T_crit - 0.1, 3]
 
   simulation = true;
-  overwrite = false;
-  plotting = false;
+  overwrite = true;
+  plotting = true;
 
   min_iterations_values = [0];
-  chi_values = [16];
+  chi_values = [4];
   max_iterations_values = [60000];
-  tolerance_values = [10e-30];
+  tolerance_values = [1e-3];
   chi_init_values = [2];
-  tensor_initialization_values = {'adjusted'};
-  traversal_order = 'reverse';
+  tensor_initialization_values = {'spin-up'};
+  traversal_order = 'standard';
 
   if plotting
     figure;
@@ -42,7 +42,7 @@ function main
 
               if plotting
                 data = dlmread(file_name);
-                plot(data(:, 1), data(:, 2), 'o--');
+                plot(data(:, 1), data(:, 2), 'o--', 'DisplayName', ['chi = ' num2str(chi)]);
               end
             end
           end
@@ -52,6 +52,7 @@ function main
   end
 
   if plotting
+    legend('-DynamicLegend');
     xlabel('T');
     ylabel('|m|');
     line([T_crit, T_crit], [0, 1], 'LineStyle', '--');
