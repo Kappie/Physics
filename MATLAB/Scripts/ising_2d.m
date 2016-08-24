@@ -31,7 +31,9 @@ function order_parameters = ising_2d(temperatures, varargin)
   J = 1;
 
   betas = 1./temperatures;
-  order_parameters = calculate_order_parameters();
+  % order_parameters = calculate_order_parameters();
+
+  display(num2str(exact_free_energy_per_site(betas(1))));
 
   function order_parameters = calculate_order_parameters()
     number_of_points = numel(betas);
@@ -85,9 +87,13 @@ function order_parameters = ising_2d(temperatures, varargin)
       else
       % If there are no previously saved tensors with same T and chi, look for
       % tensors with the same T and a higher or lower chi as a starting point.
-        [found_C, found_T, success] = find_converged_tensors_with_lower_chi(1/beta)
+        [found_C, found_T, success] = find_converged_tensors_with_different_chi(1/beta);
+        if success
+          display('Found tensors with different chi to use as starting point.')
+          initial_C = found_C;
+          initial_T = found_T;
+        end
       end
-
 
       [C, T, converged] = calculate_environment(beta, initial_C, initial_T);
 
@@ -158,7 +164,7 @@ function order_parameters = ising_2d(temperatures, varargin)
   function [C, T, success] = find_converged_tensors_with_different_tolerance(temperature)
     query = 'SELECT C, T FROM tensors WHERE temperature = ? AND chi = ? ORDER BY tolerance ASC';
     results = sqlite3.execute(query, temperature, chi);
-    % If there are no results, just return empty struct array.
+    % If there are no results, just return empty arrays.
     if isempty(results)
       success = false;
       C = [];
@@ -166,6 +172,23 @@ function order_parameters = ising_2d(temperatures, varargin)
     else
       % Select only the tensors with the highest tolerance. Since the results are ordered
       % ascending, this is the first row.
+      tensors = results(1);
+      C = getArrayFromByteStream(tensors.c);
+      T = getArrayFromByteStream(tensors.t);
+      success = true;
+    end
+  end
+
+  function [C, T, success] = find_converged_tensors_with_different_chi(temperature)
+    query = 'SELECT C, T FROM tensors WHERE temperature = ? ORDER BY chi DESC, tolerance ASC';
+    results = sqlite3.execute(query, temperature);
+    % If there are no results, just return empty arrays
+    if isempty(results)
+      success = false;
+      C = [];
+      T = [];
+    else
+      % We select the highest available chi, and the lowest available tolerance.
       tensors = results(1);
       C = getArrayFromByteStream(tensors.c);
       T = getArrayFromByteStream(tensors.t);
@@ -374,15 +397,53 @@ function order_parameters = ising_2d(temperatures, varargin)
     P = construct_P(beta);
     T = ncon({P, P, P, spin_up_tensor}, {[-1 1], [-2 2], [-3 3], [1 2 3]});
   end
+
+  % function f = exact_free_energy_per_site(beta)
+  %   K = 2 / (cosh(2*beta*J) * coth(2*beta*J));
+  %   % dK/dbeta, i.e. derivative.
+  %   dK_dbeta = 4*J*sech(2*J*beta)^3 - 4*J*sech(2*J*beta)*tanh(2*J*beta)^2;
+  %
+  %   function d = big_delta(phi)
+  %     d = sqrt(1 - K^2 * sin(phi).^2);
+  %   end
+  %
+  %   function int = integrand(phi)
+  %     int = sin(phi).^2 ./ (big_delta(phi).*(1+big_delta(phi)));
+  %   end
+  %
+  %   f = -2*J*tanh(2*beta*J) + (K/2*pi)*dK_dbeta*integral(@integrand, 0, pi);
+  % end
+
+  function f = exact_free_energy_per_site(beta)
+    k = sinh(2*beta*J)^-2;
+
+    function int = integrand(theta)
+      int = log( cosh(2*beta*J)^2 + (1/k)*sqrt(1+k^2-2*k*cos(2*theta)) );
+    end
+
+    f = (-1/beta)*( log(2)/2 + (1/(2*pi))*integral(@integrand, 0, pi) );
+  end
 end
 
-function name = converged_tensor_file_name(temperature, chi, tolerance)
-  data_folder = '~/Documents/Natuurkunde/Scriptie/Code/Data/2D_Ising/ConvergedTensors/';
-  file_name = ['T', num2str(temperature), '_chi', num2str(chi), '_tolerance', num2str(tolerance, '%.2e'), '.mat'];
-  name = fullfile(data_folder, file_name);
-end
+% ising_free - Free energy of the Ising model in thermal equilibrium
+%   ising_free(B,T) gives the free energy of
+%   Ising model in transverse field in the
+%   thermodynamic limit, if the temperature is T, the
+%   field strength is B and the coefficient
+%   of the nearest neighbor coupling is 1.
 
-function save_converged_tensors_to_file(C, T, temperature, chi, tolerance)
-  file_name = converged_tensor_file_name(temperature, chi, tolerance);
-  save(file_name, 'C', 'T');
-end
+% function F = free_energy(BField, T)
+%
+%   J=4;
+%   Gamma=2*BField;
+%   lambda=J/2/Gamma;
+%
+%   k=1;
+%   dq=0.00001;
+%   q=0:dq:pi;
+%
+%   wq=sqrt(1+2*lambda*cos(q)+lambda^2);
+%
+%   delta=log(cosh(0.5/k/T*Gamma*wq));
+%   F=-k*T*(log(2)+1/pi*sum(delta)*dq);
+% end

@@ -4,10 +4,10 @@ function main
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
   % temperatures = linspace(T_crit - .01, T_crit + .01, 9);
-  temperatures = [T_crit];
+  temperatures = [0.1];
   chi_values = [2];
   max_iterations = 1e5;
-  tolerance = 1e-10;
+  tolerance = 1e-5;
 
   number_of_points = numel(chi_values);
   magnetizations = zeros(number_of_points, 1);
