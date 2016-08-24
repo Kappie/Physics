@@ -4,21 +4,24 @@ function main
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
   % temperatures = linspace(T_crit - .01, T_crit + .01, 9);
-  temperatures = [0.1];
-  chi_values = [2];
+  temperatures = [T_crit + 1];
+  chi_values = [8];
   max_iterations = 1e5;
-  tolerance = 1e-5;
+  tolerance = 1e-6;
 
-  number_of_points = numel(chi_values);
-  magnetizations = zeros(number_of_points, 1);
 
-  for i = 1:number_of_points
-    chi = chi_values(i);
-    result = ising_2d(temperatures, 'chi', chi, 'tolerance', tolerance, 'max_iterations', max_iterations);
-    magnetizations(i) = result(1);
-  end
+  result = ising_2d(temperatures, 'chi', chi_values(1), 'tolerance', tolerance, 'max_iterations', max_iterations);
 
-  plot(1./chi_values, magnetizations, 'o--')
+  % number_of_points = numel(chi_values);
+  % magnetizations = zeros(number_of_points, 1);
+  %
+  % for i = 1:number_of_points
+  %   chi = chi_values(i);
+  %   result = ising_2d(temperatures, 'chi', chi, 'tolerance', tolerance, 'max_iterations', max_iterations);
+  %   magnetizations(i) = result(1);
+  % end
+  %
+  % plot(1./chi_values, magnetizations, 'o--')
 
 
 

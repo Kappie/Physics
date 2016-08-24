@@ -1,4 +1,4 @@
-function order_parameters = ising_2d(temperatures, varargin)
+function result = ising_2d(temperatures, varargin)
   p = inputParser;
   default_chi = 4;
   default_chi_init = 2;
@@ -31,9 +31,13 @@ function order_parameters = ising_2d(temperatures, varargin)
   J = 1;
 
   betas = 1./temperatures;
+  [C, T] = calculate_environment_if_it_does_not_exist(betas(1), ...
+    spin_up_initial_C(betas(1)), spin_up_initial_T(betas(1)));
+  result = free_energy_per_site(betas(1), C, T);
   % order_parameters = calculate_order_parameters();
 
   display(num2str(exact_free_energy_per_site(betas(1))));
+  display(result)
 
   function order_parameters = calculate_order_parameters()
     number_of_points = numel(betas);
@@ -211,7 +215,8 @@ function order_parameters = ising_2d(temperatures, varargin)
     Z = partition_function(beta, C, T);
     four_corners = ncon({C, C, C, C}, {[1 2], [2 3], [3 4], [4 1]});
     two_rows = ncon({C, T, C, C, T, C}, {[1 2], [3 2 4], [4 5], [5 6], [3 6 7], [7 1]});
-    f = Z * four_corners / two_rows^2;
+    kappa = Z * four_corners / two_rows^2;
+    f = - (1/beta)*log(kappa);
   end
 
   function Z = partition_function(beta, C, T)
