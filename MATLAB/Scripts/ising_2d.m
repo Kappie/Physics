@@ -2,10 +2,10 @@ function order_parameters = ising_2d(temperatures, varargin)
   p = inputParser;
   default_chi = 4;
   default_chi_init = 2;
-  default_tolerance = 1e-6;
-  default_max_iterations = 200;
+  default_tolerance = 1e-8;
+  default_max_iterations = 1e5;
   default_min_iterations = 0;
-  default_tensor_initialization = 'random';
+  default_tensor_initialization = 'spin-up';
   default_traversal_order = 'standard';
 
   addRequired(p, 'temperatures');
@@ -70,21 +70,39 @@ function order_parameters = ising_2d(temperatures, varargin)
 
     % Database schema: (c BLOB, t BLOB, temperature NUMERIC, chi NUMERIC, tolerance NUMERIC)
     sqlite3.open(database);
-    result = sqlite3.execute('SELECT C, T FROM tensors where temperature = ? AND chi = ? AND tolerance = ? LIMIT 1', ...
+    converged_tensors = sqlite3.execute(...
+      'SELECT C, T FROM tensors where temperature = ? AND chi = ? AND tolerance = ? LIMIT 1', ...
       1/beta, chi, tolerance);
 
-    if isempty(result)
+    if isempty(converged_tensors)
+      % Look for previously saved tensors with same T and chi, but higher or lower tolerance
+      % to use as a starting point for current simulation.
+      [found_C, found_T, success] = find_converged_tensors_with_different_tolerance(1/beta);
+      if success
+        display('found tensors with different tolerance to use as starting point.')
+        initial_C = found_C;
+        initial_T = found_T;
+      else
+      % If there are no previously saved tensors with same T and chi, look for
+      % tensors with the same T and a higher or lower chi as a starting point.
+        [found_C, found_T, success] = find_converged_tensors_with_lower_chi(1/beta)
+      end
+
+
       [C, T, converged] = calculate_environment(beta, initial_C, initial_T);
+
       if converged
         serialized_C = getByteStreamFromArray(C);
         serialized_T = getByteStreamFromArray(T);
         sqlite3.execute('INSERT INTO tensors VALUES (?, ?, ?, ?, ?)', ...
           serialized_C, serialized_T, 1/beta, chi, tolerance);
+        display('I put stuff in the DB.')
+        display(['temp = ' num2str(1/beta) ' chi = ' num2str(chi) ' tolerance = ' num2str(tolerance)])
       end
     else
-      C = getArrayFromByteStream(result.c);
-      T = getArrayFromByteStream(result.t);
-      display('I loaded data from the DB :D')
+      C = getArrayFromByteStream(converged_tensors.c);
+      T = getArrayFromByteStream(converged_tensors.t);
+      display('I loaded stuff from the DB.')
     end
   end
 
@@ -112,8 +130,11 @@ function order_parameters = ising_2d(temperatures, varargin)
         break
       end
     end
+
     if c > tolerance
       converged = false;
+      display(['Failed to converge. convergence = ' num2str(c)])
+      display(['temperature = ' num2str(1/beta) ' chi = ' num2str(chi) ' tolerance = ' num2str(tolerance)])
     end
 
     % figure;
@@ -132,6 +153,24 @@ function order_parameters = ising_2d(temperatures, varargin)
     % file_name = ['convergences_chi' num2str(chi) 'T' num2str(1/beta) '.dat'];
     % name = fullfile(data_dir, file_name);
     % save_to_file(cell2mat(convergences)', name, true);
+  end
+
+  function [C, T, success] = find_converged_tensors_with_different_tolerance(temperature)
+    query = 'SELECT C, T FROM tensors WHERE temperature = ? AND chi = ? ORDER BY tolerance ASC';
+    results = sqlite3.execute(query, temperature, chi);
+    % If there are no results, just return empty struct array.
+    if isempty(results)
+      success = false;
+      C = [];
+      T = [];
+    else
+      % Select only the tensors with the highest tolerance. Since the results are ordered
+      % ascending, this is the first row.
+      tensors = results(1);
+      C = getArrayFromByteStream(tensors.c);
+      T = getArrayFromByteStream(tensors.t);
+      success = true;
+    end
   end
 
   function m = order_parameter(beta, C, T)
