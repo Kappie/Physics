@@ -30,43 +30,22 @@ function result = ising_2d(temperatures, varargin)
   database = 'converged_tensors.db';
   J = 1;
 
-  betas = 1./temperatures;
   % [C, T] = calculate_environment_if_it_does_not_exist(betas(1), ...
   %   spin_up_initial_C(betas(1)), spin_up_initial_T(betas(1)));
   % result = free_energy_per_site(betas(1), C, T);
-  result = calculate_order_parameters();
+  result = calculate_order_parameters(1./temperatures);
 
-  function order_parameters = calculate_order_parameters()
+  function order_parameters = calculate_order_parameters(betas)
     number_of_points = numel(betas);
     order_parameters = zeros(1, number_of_points);
-    C = random_C();
-    T = random_T();
 
     for i = 1:number_of_points
-      if strcmp(traversal_order, 'reverse')
-        i = number_of_points - i + 1;
-      end
-      % If not using specific initialization, the converged environment tensors
-      % T, C at the previously calculated beta are used.
-      if strcmp(tensor_initialization, 'random')
-        C = random_C();
-        T = random_T();
-
-      elseif strcmp(tensor_initialization, 'symmetric')
-        C = symmetric_initial_C(betas(i))
-        T = symmetric_initial_T(betas(i));
-
-      elseif strcmp(tensor_initialization, 'spin-up')
-        C = spin_up_initial_C(betas(i));
-        T = spin_up_initial_T(betas(i));
-      end
-
-      [C, T] = calculate_environment_if_it_does_not_exist(betas(i), C, T);
+      [C, T] = calculate_environment_if_it_does_not_exist(betas(i));
       order_parameters(i) = order_parameter(betas(i), C, T);
     end
   end
 
-  function [C, T] = calculate_environment_if_it_does_not_exist(beta, initial_C, initial_T)
+  function [C, T] = calculate_environment_if_it_does_not_exist(beta)
     % This function tries to find existing converged environment tensors in a sqlite3 database.
     % I look for all records with the same temperature, lesser or equal chi and greater or equal tolerance.
     % If I find an exact match (same temperature, chi, tolerance as I'm trying to simulate)
@@ -76,6 +55,9 @@ function result = ising_2d(temperatures, varargin)
 
     % Database schema: CREATE TABLE tensors (c BLOB, t BLOB, temperature NUMERIC, chi NUMERIC, tolerance NUMERIC)
     simulation = true;
+    initial_C = spin_up_initial_C(beta);
+    initial_T = spin_up_initial_T(beta);
+
     sqlite3.open(database);
     query = ['SELECT * ' ...
       'FROM tensors ' ...

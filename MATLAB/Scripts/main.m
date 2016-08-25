@@ -25,7 +25,7 @@ function main
 
   % Experiment 2
   % Plot magnetization versus 1/chi for high chi_values.
-  chi_values = [6];
+  chi_values = [8];
   temperature = T_crit + 1;
 
   number_of_points = numel(chi_values);
