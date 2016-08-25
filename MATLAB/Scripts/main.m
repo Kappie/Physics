@@ -4,30 +4,29 @@ function main
   beta_crit = log(1 + sqrt(2)) / 2; % ~0.44
   T_crit = 1 / beta_crit;
 
-
-
-  % Experiment 1
-  % Plot magnetization vs temperature around critical point.
-  temperatures = linspace(T_crit - .01, T_crit + .01, 9);
-  chi_values = [2, 4, 8, 16, 32, 48, 64, 80, 96, 112, 128];
   max_iterations = 1e6;
   tolerance = 1e-6;
 
-  dataset = zeros(numel(temperatures), numel(chi_values));
-
-  for i = 1:numel(chi_values)
-    order_parameters = ising_2d(temperatures, 'chi', chi_values(i), ...
-      'tolerance', tolerance, 'max_iterations', max_iterations);
-    dataset(:,i) = order_parameters;
-  end
-
-  figure
-  plot(temperatures, dataset, '--o')
+  % Experiment 1
+  % Plot magnetization vs temperature around critical point.
+  % temperatures = linspace(T_crit - .01, T_crit + .01, 9);
+  % chi_values = [2, 4, 8, 16, 32, 48, 64, 80, 96, 112, 128];
+  %
+  % dataset = zeros(numel(temperatures), numel(chi_values));
+  %
+  % for i = 1:numel(chi_values)
+  %   order_parameters = ising_2d(temperatures, 'chi', chi_values(i), ...
+  %     'tolerance', tolerance, 'max_iterations', max_iterations);
+  %   dataset(:,i) = order_parameters;
+  % end
+  %
+  % figure
+  % plot(temperatures, dataset, '--o')
 
   % Experiment 2
   % Plot magnetization versus 1/chi for high chi_values.
-  chi_values = [2, 4, 8, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160];
-  temperature = T_crit;
+  chi_values = [6];
+  temperature = T_crit + 1;
 
   number_of_points = numel(chi_values);
   magnetizations = zeros(number_of_points, 1);
@@ -37,8 +36,8 @@ function main
     magnetizations(i) = result(1);
   end
 
-  figure
-  plot(1./chi_values, magnetizations, 'o--')
+  % figure
+  % plot(1./chi_values, magnetizations, 'o--')
 
 
 

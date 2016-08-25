@@ -75,6 +75,7 @@ function result = ising_2d(temperatures, varargin)
     % I select the C, T from that record to use as initial C, T for the new simulation.
 
     % Database schema: CREATE TABLE tensors (c BLOB, t BLOB, temperature NUMERIC, chi NUMERIC, tolerance NUMERIC)
+    simulation = true;
     sqlite3.open(database);
     query = ['SELECT * ' ...
       'FROM tensors ' ...
@@ -95,7 +96,6 @@ function result = ising_2d(temperatures, varargin)
         display('I loaded stuff from the DB.')
       % Use found C, T as initialization.
       else
-        simulation = true;
         initial_C = found_C;
         initial_T = found_T;
       end
