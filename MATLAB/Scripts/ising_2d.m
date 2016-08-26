@@ -1,9 +1,11 @@
 function result = ising_2d(temperatures, varargin)
   p = inputParser;
-  default_chi = 4;
+  default_chi = false;
+  default_tolerance = false;
+  default_N = false;
+
   default_chi_init = 2;
-  default_tolerance = 1e-8;
-  default_max_iterations = 1e5;
+  default_max_iterations = 1e6;
   default_min_iterations = 0;
   default_tensor_initialization = 'spin-up';
   default_traversal_order = 'standard';
@@ -16,12 +18,15 @@ function result = ising_2d(temperatures, varargin)
   addParameter(p, 'min_iterations', default_min_iterations);
   addParameter(p, 'tensor_initialization', default_tensor_initialization);
   addParameter(p, 'traversal_order', default_traversal_order);
+  addParameter(p, 'N', default_N);
 
   parse(p, temperatures, varargin{:});
 
   chi = p.Results.chi;
-  chi_init = p.Results.chi_init;
   tolerance = p.Results.tolerance;
+  N = p.Results.N;
+
+  chi_init = p.Results.chi_init;
   max_iterations = p.Results.max_iterations;
   min_iterations = p.Results.min_iterations;
   tensor_initialization = p.Results.tensor_initialization;
@@ -30,9 +35,6 @@ function result = ising_2d(temperatures, varargin)
   database = 'converged_tensors.db';
   J = 1;
 
-  % [C, T] = calculate_environment_if_it_does_not_exist(betas(1), ...
-  %   spin_up_initial_C(betas(1)), spin_up_initial_T(betas(1)));
-  % result = free_energy_per_site(betas(1), C, T);
   result = calculate_order_parameters(1./temperatures);
 
   function order_parameters = calculate_order_parameters(betas)
@@ -55,6 +57,7 @@ function result = ising_2d(temperatures, varargin)
 
     % Database schema: CREATE TABLE tensors (c BLOB, t BLOB, temperature NUMERIC, chi NUMERIC, tolerance NUMERIC)
     simulation = true;
+    save_to_db = true;
     initial_C = spin_up_initial_C(beta);
     initial_T = spin_up_initial_T(beta);
 
@@ -62,16 +65,16 @@ function result = ising_2d(temperatures, varargin)
     query = ['SELECT * ' ...
       'FROM tensors ' ...
       'WHERE temperature = ? AND chi <= ? AND tolerance >= ? ' ...
-      'ORDER BY chi DESC, tolerance ASC ' ...
+      'ORDER BY c hi DESC, tolerance ASC ' ...
       'LIMIT 1'];
-    found_record = sqlite3.execute(query, 1/beta, chi, tolerance)
+    found_record = sqlite3.execute(query, 1/beta, chi, tolerance);
 
     if ~isempty(found_record)
       found_C = getArrayFromByteStream(found_record.c);
       found_T = getArrayFromByteStream(found_record.t);
 
       % Found exact tensors I was looking for; do not simulate at all.
-      if found_record.chi == chi and found_record.tolerance == tolerance
+      if found_record.chi == chi & found_record.tolerance == tolerance
         simulation = false;
         C = found_C;
         T = found_T;
@@ -86,14 +89,19 @@ function result = ising_2d(temperatures, varargin)
     if simulation
       [C, T, converged] = calculate_environment(beta, initial_C, initial_T);
 
-      if converged
+      if converged & save_to_db
         serialized_C = getByteStreamFromArray(C);
         serialized_T = getByteStreamFromArray(T);
         sqlite3.execute('INSERT INTO tensors VALUES (?, ?, ?, ?, ?)', ...
           serialized_C, serialized_T, 1/beta, chi, tolerance);
-        display('I put stuff in the DB.')
-        display(['temp = ' num2str(1/beta) ' chi = ' num2str(chi) ' tolerance = ' num2str(tolerance)])
+        display('I put stuff in the DB:')
+      elseif ~converged
+        display('Failed to converge:')
+      elseif ~save_to_db
+        display('Not saving to db.')
       end
+
+      display(['temp = ' num2str(1/beta) ' chi = ' num2str(chi) ' tolerance = ' num2str(tolerance)])
     end
   end
 
@@ -101,20 +109,19 @@ function result = ising_2d(temperatures, varargin)
     C = initial_C;
     T = initial_T;
 
-    singular_values = initial_singular_values();
-    singular_values_of_all_iterations = {singular_values};
-    convergences = {};
-    order_parameters = {};
+    % Here, I use a hack to fix the number of iterations to N.
+    if N
+      tolerance = -1;
+      max_iterations = N;
+    end
 
+    singular_values = initial_singular_values();
     a = construct_a(beta);
 
     for iteration = 1:max_iterations
       singular_values_old = singular_values;
       [C, T, singular_values] = grow_lattice(C, T, a, chi);
-      singular_values_of_all_iterations{end + 1} = singular_values;
       c = convergence(singular_values, singular_values_old);
-      convergences{end + 1} = c;
-      order_parameters{end + 1} = order_parameter(beta, C, T);
 
       if c < tolerance && iteration >= min_iterations
         converged = true;
@@ -124,8 +131,6 @@ function result = ising_2d(temperatures, varargin)
 
     if c > tolerance
       converged = false;
-      display(['Failed to converge. convergence = ' num2str(c)])
-      display(['temperature = ' num2str(1/beta) ' chi = ' num2str(chi) ' tolerance = ' num2str(tolerance)])
     end
 
     % figure;

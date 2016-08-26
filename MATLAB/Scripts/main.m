@@ -5,12 +5,14 @@ function main
   T_crit = 1 / beta_crit;
 
   max_iterations = 1e6;
-  tolerance = 1e-6;
+  tolerance = 1e-7;
 
   % Experiment 1
   % Plot magnetization vs temperature around critical point.
+
   % temperatures = linspace(T_crit - .01, T_crit + .01, 9);
-  % chi_values = [2, 4, 8, 16, 32, 48, 64, 80, 96, 112, 128];
+  % chi_values = [2, 4, 8, 16, 32, 48, 64, 80];
+  % legend_labels = arrayfun(@(chi) ['chi = ' num2str(chi)], chi_values, 'UniformOutput', false);
   %
   % dataset = zeros(numel(temperatures), numel(chi_values));
   %
@@ -22,22 +24,38 @@ function main
   %
   % figure
   % plot(temperatures, dataset, '--o')
+  % legend(legend_labels, 'Location', 'southwest')
+  % line([T_crit, T_crit], [0, 1], 'LineStyle', '--');
+  % xlabel('T')
+  % ylabel('|m|')
+  % title('Magnetization of 2D Ising model at tolerance = 1e-7')
 
   % Experiment 2
   % Plot magnetization versus 1/chi for high chi_values.
-  chi_values = [8];
-  temperature = T_crit + 1;
 
-  number_of_points = numel(chi_values);
-  magnetizations = zeros(number_of_points, 1);
+  chi_values = [2, 4, 8, 16, 32, 64, 80, 96, 112];
+  tolerance_values = [1e-4, 1e-5, 1e-6, 1e-7];
+  temperature = T_crit 
+  legend_labels = arrayfun(@(tolerance) ['tolerance = ' num2str(tolerance, '%.0e')], tolerance_values, 'UniformOutput', false);
 
-  for i = 1:number_of_points
-    result = ising_2d([temperature], 'chi', chi_values(i), 'tolerance', tolerance, 'max_iterations', max_iterations);
-    magnetizations(i) = result(1);
+  magnetizations = zeros(numel(chi_values), numel(tolerance_values));
+
+  for t = 1:numel(tolerance_values)
+    for c = 1:numel(chi_values)
+      profile on
+      result = ising_2d([temperature], 'chi', chi_values(c), 'tolerance', ...
+        tolerance_values(t), 'max_iterations', max_iterations);
+      profsave
+      magnetizations(c, t) = result(1);
+    end
   end
 
   % figure
   % plot(1./chi_values, magnetizations, 'o--')
+  % legend(legend_labels);
+  % xlabel('1 / chi')
+  % ylabel('|m|')
+  % title('Magnetization of 2D Ising model at T_{crit}')
 
 
 
