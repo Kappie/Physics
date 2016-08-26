@@ -1,8 +1,8 @@
 function result = ising_2d(temperatures, varargin)
   p = inputParser;
-  default_chi = false;
-  default_tolerance = false;
-  default_N = false;
+  default_chi = [];
+  default_tolerance = [];
+  default_N = [];
 
   default_chi_init = 2;
   default_max_iterations = 1e6;
@@ -33,6 +33,8 @@ function result = ising_2d(temperatures, varargin)
   traversal_order = p.Results.traversal_order;
 
   database = 'converged_tensors.db';
+  save_to_db = true;
+
   J = 1;
 
   result = calculate_order_parameters(1./temperatures);
@@ -49,29 +51,60 @@ function result = ising_2d(temperatures, varargin)
 
   function [C, T] = calculate_environment_if_it_does_not_exist(beta)
     % This function tries to find existing converged environment tensors in a sqlite3 database.
+    % If the tensors I need do not exist, I calculate them. I try various strategies (depending on
+    % whether I do a fixed N simulation or try to reach a certain convergence, to come up with
+    % initial tensors I can use from the database.
+    % Database schema: CREATE TABLE tensors (c BLOB, t BLOB, temperature NUMERIC, chi NUMERIC, tolerance NUMERIC, n NUMERIC)
+    simulation = true;
+    initial_C = spin_up_initial_C(beta);
+    initial_T = spin_up_initial_T(beta);
+
+    sqlite3.open(database);
+
+    if N
+      [C, T] = environment_with_fixed_iterations(1/beta, initial_C, initial_T);
+    else
+      [C, T] = environment_with_fixed_tolerance(1/beta, initial_C, initial_T);
+    end
+  end
+
+  function [C, T] = environment_with_fixed_iterations(beta, initial_C, initial_T)
+    % I look for records with the same temperature, same chi, and lower N.
+    % If I find a such a tensor, I subtract the number of steps I need to take in my simulation.
+    query = ['SELECT * ' ...
+      'FROM tensors ' ...
+      'WHERE temperature = ? AND chi = ? AND n <= ? ' ...
+      'ORDER BY n DESC ' ...
+      'LIMIT 1'];
+    found_record = sqlite3.execute(query, 1/beta, chi, N);
+
+    if ~isempty(found_record)
+      [intial_C, intial_T] = deserialize_tensors(found_record)
+      number_of_iterations_remaining = N - found_record.N;
+    end
+
+    [C, T, not_used] = calculate_environment(beta, initial_C, initial_T, number_of_iterations_remaining);
+    if save_to_db
+      sqlite3.execute('INSERT INTO tensors (temperature, chi, n, c, t) VALUES (?, ?, ?, ?, ?)', ...
+        1/beta, chi, N, getByteStreamFromArray(C), getByteStreamFromArray(T));
+    end
+  end
+
+  function [C, T] = environment_with_fixed_tolerance(beta, initial_C, initial_T)
     % I look for all records with the same temperature, lesser or equal chi and greater or equal tolerance.
     % If I find an exact match (same temperature, chi, tolerance as I'm trying to simulate)
     % I do not simulate again and just return the C, T tensors from the database.
     % If I find a record with matching temperature and lesser chi or higher tolerance (highest chi takes precedence)
     % I select the C, T from that record to use as initial C, T for the new simulation.
-
-    % Database schema: CREATE TABLE tensors (c BLOB, t BLOB, temperature NUMERIC, chi NUMERIC, tolerance NUMERIC)
-    simulation = true;
-    save_to_db = true;
-    initial_C = spin_up_initial_C(beta);
-    initial_T = spin_up_initial_T(beta);
-
-    sqlite3.open(database);
     query = ['SELECT * ' ...
       'FROM tensors ' ...
       'WHERE temperature = ? AND chi <= ? AND tolerance >= ? ' ...
-      'ORDER BY c hi DESC, tolerance ASC ' ...
+      'ORDER BY chi DESC, tolerance ASC ' ...
       'LIMIT 1'];
     found_record = sqlite3.execute(query, 1/beta, chi, tolerance);
 
     if ~isempty(found_record)
-      found_C = getArrayFromByteStream(found_record.c);
-      found_T = getArrayFromByteStream(found_record.t);
+      [found_C, found_T] = deserialize_tensors(found_record);
 
       % Found exact tensors I was looking for; do not simulate at all.
       if found_record.chi == chi & found_record.tolerance == tolerance
@@ -79,7 +112,6 @@ function result = ising_2d(temperatures, varargin)
         C = found_C;
         T = found_T;
         display('I loaded stuff from the DB.')
-      % Use found C, T as initialization.
       else
         initial_C = found_C;
         initial_T = found_T;
@@ -105,16 +137,27 @@ function result = ising_2d(temperatures, varargin)
     end
   end
 
-  function [C, T, converged] = calculate_environment(beta, initial_C, initial_T)
-    C = initial_C;
-    T = initial_T;
+  function [C, T, converged] = calculate_environment(beta, initial_C, initial_T, varargin)
+    p = inputParser;
+    default_number_of_iterations = [];
+    addRequired(p, 'beta');
+    addRequired(p, 'initial_C');
+    addRequired(p, 'initial_T');
+    addOptional(p, 'number_of_iterations', default_number_of_iterations);
 
-    % Here, I use a hack to fix the number of iterations to N.
-    if N
+    parse(p, beta, initial_C, initial_T, varargin{:});
+    number_of_iterations = p.Results.number_of_iterations;
+
+    % Here, I use a hack to fix the number of iterations.
+    if ~isequal(number_of_iterations, default_number_of_iterations)
       tolerance = -1;
-      max_iterations = N;
+      max_iterations = number_of_iterations;
     end
 
+
+
+    C = initial_C;
+    T = initial_T;
     singular_values = initial_singular_values();
     a = construct_a(beta);
 
@@ -378,6 +421,11 @@ function result = ising_2d(temperatures, varargin)
     end
 
     f = (-1/beta)*( log(2)/2 + (1/(2*pi))*integral(@integrand, 0, pi) );
+  end
+
+  function [C, T] = deserialize_tensors(record)
+    C = getArrayFromByteStream(record.c);
+    T = getArrayFromByteStream(record.t);
   end
 end
 
