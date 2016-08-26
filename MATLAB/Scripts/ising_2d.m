@@ -32,7 +32,7 @@ function result = ising_2d(temperatures, varargin)
   tensor_initialization = p.Results.tensor_initialization;
   traversal_order = p.Results.traversal_order;
 
-  database = 'converged_tensors.db';
+  database = 'test.db';
   save_to_db = true;
 
   J = 1;
@@ -55,16 +55,15 @@ function result = ising_2d(temperatures, varargin)
     % whether I do a fixed N simulation or try to reach a certain convergence, to come up with
     % initial tensors I can use from the database.
     % Database schema: CREATE TABLE tensors (c BLOB, t BLOB, temperature NUMERIC, chi NUMERIC, tolerance NUMERIC, n NUMERIC)
-    simulation = true;
     initial_C = spin_up_initial_C(beta);
     initial_T = spin_up_initial_T(beta);
 
     sqlite3.open(database);
 
     if N
-      [C, T] = environment_with_fixed_iterations(1/beta, initial_C, initial_T);
+      [C, T] = environment_with_fixed_iterations(beta, initial_C, initial_T);
     else
-      [C, T] = environment_with_fixed_tolerance(1/beta, initial_C, initial_T);
+      [C, T] = environment_with_fixed_tolerance(beta, initial_C, initial_T);
     end
   end
 
@@ -78,15 +77,24 @@ function result = ising_2d(temperatures, varargin)
       'LIMIT 1'];
     found_record = sqlite3.execute(query, 1/beta, chi, N);
 
+    number_of_iterations_remaining = N;
+
     if ~isempty(found_record)
-      [intial_C, intial_T] = deserialize_tensors(found_record)
-      number_of_iterations_remaining = N - found_record.N;
+      [initial_C, initial_T] = deserialize_tensors(found_record);
+      number_of_iterations_remaining = number_of_iterations_remaining - found_record.n;
+      display('Found a record:')
+      display(['number of iterations remaining: ' num2str(number_of_iterations_remaining)]);
     end
 
-    [C, T, not_used] = calculate_environment(beta, initial_C, initial_T, number_of_iterations_remaining);
-    if save_to_db
-      sqlite3.execute('INSERT INTO tensors (temperature, chi, n, c, t) VALUES (?, ?, ?, ?, ?)', ...
-        1/beta, chi, N, getByteStreamFromArray(C), getByteStreamFromArray(T));
+    if number_of_iterations_remaining == 0
+      C = initial_C; T = initial_T;
+    else
+      [C, T, ~] = calculate_environment(beta, initial_C, initial_T, number_of_iterations_remaining);
+      if save_to_db
+        sqlite3.execute('INSERT INTO tensors (temperature, chi, n, c, t) VALUES (?, ?, ?, ?, ?)', ...
+          1/beta, chi, N, getByteStreamFromArray(C), getByteStreamFromArray(T));
+        display('saved stuff to db')
+      end
     end
   end
 
@@ -96,6 +104,7 @@ function result = ising_2d(temperatures, varargin)
     % I do not simulate again and just return the C, T tensors from the database.
     % If I find a record with matching temperature and lesser chi or higher tolerance (highest chi takes precedence)
     % I select the C, T from that record to use as initial C, T for the new simulation.
+    simulation = true;
     query = ['SELECT * ' ...
       'FROM tensors ' ...
       'WHERE temperature = ? AND chi <= ? AND tolerance >= ? ' ...
@@ -121,7 +130,7 @@ function result = ising_2d(temperatures, varargin)
     if simulation
       [C, T, converged] = calculate_environment(beta, initial_C, initial_T);
 
-      if converged & save_to_db
+      if converged && save_to_db
         serialized_C = getByteStreamFromArray(C);
         serialized_T = getByteStreamFromArray(T);
         sqlite3.execute('INSERT INTO tensors VALUES (?, ?, ?, ?, ?)', ...
@@ -152,6 +161,7 @@ function result = ising_2d(temperatures, varargin)
     if ~isequal(number_of_iterations, default_number_of_iterations)
       tolerance = -1;
       max_iterations = number_of_iterations;
+      converged = [];
     end
 
 
