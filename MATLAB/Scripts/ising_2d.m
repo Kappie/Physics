@@ -32,7 +32,7 @@ function result = ising_2d(temperatures, varargin)
   tensor_initialization = p.Results.tensor_initialization;
   traversal_order = p.Results.traversal_order;
 
-  database = 'test.db';
+  database = 'converged_tensors.db';
   save_to_db = true;
 
   J = 1;
