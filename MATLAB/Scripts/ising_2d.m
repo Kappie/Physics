@@ -58,6 +58,10 @@ function result = ising_2d(temperatures, varargin)
     initial_C = spin_up_initial_C(beta);
     initial_T = spin_up_initial_T(beta);
 
+
+    % Without pause, database can crash if I make too many requests.
+    % This is really just a poor hack because I didn't organize everything into one query yet.
+    pause(0.001);
     sqlite3.open(database);
 
     if N
@@ -133,7 +137,7 @@ function result = ising_2d(temperatures, varargin)
       if converged && save_to_db
         serialized_C = getByteStreamFromArray(C);
         serialized_T = getByteStreamFromArray(T);
-        sqlite3.execute('INSERT INTO tensors VALUES (?, ?, ?, ?, ?)', ...
+        sqlite3.execute('INSERT INTO tensors (c, t, temperature, chi, tolerance) VALUES (?, ?, ?, ?, ?)', ...
           serialized_C, serialized_T, 1/beta, chi, tolerance);
         display('I put stuff in the DB:')
       elseif ~converged

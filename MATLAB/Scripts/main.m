@@ -3,7 +3,8 @@ function main
   format long;
 
   % plot_m_vs_chi_at_tcrit;
-  plot_m_vs_N_at_tcrit
+  % plot_m_vs_N_at_tcrit
+  plot_m_vs_T
 
   % max_iterations = 1e6;
   % tolerance = 1e-7;
@@ -11,27 +12,6 @@ function main
   % result = ising_2d([temperature], 'chi', chi, 'N', N)
 
   % EXPERIMENT
-  % Plot magnetization vs temperature around critical point.
-
-  % temperatures = linspace(T_crit - .01, T_crit + .01, 9);
-  % chi_values = [2, 4, 8, 16, 32, 48, 64, 80];
-  % legend_labels = arrayfun(@(chi) ['chi = ' num2str(chi)], chi_values, 'UniformOutput', false);
-  %
-  % dataset = zeros(numel(temperatures), numel(chi_values));
-  %
-  % for i = 1:numel(chi_values)
-  %   order_parameters = ising_2d(temperatures, 'chi', chi_values(i), ...
-  %     'tolerance', tolerance, 'max_iterations', max_iterations);
-  %   dataset(:,i) = order_parameters;
-  % end
-  %
-  % figure
-  % plot(temperatures, dataset, '--o')
-  % legend(legend_labels, 'Location', 'southwest')
-  % line([T_crit, T_crit], [0, 1], 'LineStyle', '--');
-  % xlabel('T')
-  % ylabel('|m|')
-  % title('Magnetization of 2D Ising model at tolerance = 1e-7')
 
   % EXPERIMENT
   % Plot magnetization versus 1/chi for high chi_values.
