@@ -1,7 +1,7 @@
 function plot_m_vs_N_at_tcrit()
   temperature = T_crit;
-  chi_values = [4:4:32];
-  N_values = [500:500:20000];
+  chi_values = [4, 16, 32];
+  N_values = 50:50:1000;
   MARKERS = markers();
 
   legend_labels = arrayfun(@(chi) ['chi = ' num2str(chi)], chi_values, 'UniformOutput', false);
@@ -14,7 +14,7 @@ function plot_m_vs_N_at_tcrit()
   for c = 1:numel(chi_values)
     for n = 1:numel(N_values)
       order_parameters = ising_2d([temperature], 'chi', chi_values(c), 'N', N_values(n));
-      dataset(n,c) = order_parameters(1);
+      dataset(n,c) = abs(order_parameters(1));
     end
     plot(N_values, dataset(:, c), MARKERS(c))
   end

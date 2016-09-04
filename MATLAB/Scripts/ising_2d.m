@@ -37,7 +37,8 @@ function result = ising_2d(temperatures, varargin)
 
   J = 1;
 
-  result = calculate_order_parameters(1./temperatures);
+  % result = calculate_order_parameters(1./temperatures);
+  result = calculate_free_energy_per_site(1./temperatures);
 
   function order_parameters = calculate_order_parameters(betas)
     number_of_points = numel(betas);
@@ -46,6 +47,16 @@ function result = ising_2d(temperatures, varargin)
     for i = 1:number_of_points
       [C, T] = calculate_environment_if_it_does_not_exist(betas(i));
       order_parameters(i) = order_parameter(betas(i), C, T);
+    end
+  end
+
+  function data_points = calculate_free_energy_per_site(betas)
+    number_of_points = numel(betas);
+    data_points = zeros(1, number_of_points);
+
+    for i = 1:number_of_points
+      [C, T] = calculate_environment_if_it_does_not_exist(betas(i));
+      data_points(i) = free_energy_per_site(betas(i), C, T);
     end
   end
 
@@ -411,57 +422,8 @@ function result = ising_2d(temperatures, varargin)
     T = ncon({P, P, P, spin_up_tensor}, {[-1 1], [-2 2], [-3 3], [1 2 3]});
   end
 
-  % function f = exact_free_energy_per_site(beta)
-  %   K = 2 / (cosh(2*beta*J) * coth(2*beta*J));
-  %   % dK/dbeta, i.e. derivative.
-  %   dK_dbeta = 4*J*sech(2*J*beta)^3 - 4*J*sech(2*J*beta)*tanh(2*J*beta)^2;
-  %
-  %   function d = big_delta(phi)
-  %     d = sqrt(1 - K^2 * sin(phi).^2);
-  %   end
-  %
-  %   function int = integrand(phi)
-  %     int = sin(phi).^2 ./ (big_delta(phi).*(1+big_delta(phi)));
-  %   end
-  %
-  %   f = -2*J*tanh(2*beta*J) + (K/2*pi)*dK_dbeta*integral(@integrand, 0, pi);
-  % end
-
-  function f = exact_free_energy_per_site(beta)
-    k = sinh(2*beta*J)^-2;
-
-    function int = integrand(theta)
-      int = log( cosh(2*beta*J)^2 + (1/k)*sqrt(1+k^2-2*k*cos(2*theta)) );
-    end
-
-    f = (-1/beta)*( log(2)/2 + (1/(2*pi))*integral(@integrand, 0, pi) );
-  end
-
   function [C, T] = deserialize_tensors(record)
     C = getArrayFromByteStream(record.c);
     T = getArrayFromByteStream(record.t);
   end
 end
-
-% ising_free - Free energy of the Ising model in thermal equilibrium
-%   ising_free(B,T) gives the free energy of
-%   Ising model in transverse field in the
-%   thermodynamic limit, if the temperature is T, the
-%   field strength is B and the coefficient
-%   of the nearest neighbor coupling is 1.
-
-% function F = free_energy(BField, T)
-%
-%   J=4;
-%   Gamma=2*BField;
-%   lambda=J/2/Gamma;
-%
-%   k=1;
-%   dq=0.00001;
-%   q=0:dq:pi;
-%
-%   wq=sqrt(1+2*lambda*cos(q)+lambda^2);
-%
-%   delta=log(cosh(0.5/k/T*Gamma*wq));
-%   F=-k*T*(log(2)+1/pi*sum(delta)*dq);
-% end
