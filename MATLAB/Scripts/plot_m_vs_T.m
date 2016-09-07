@@ -1,12 +1,13 @@
 function plot_m_vs_T
 
-  % Plot magnetization vs temperature around critical point.
-  tolerance = 1e-7;
-  max_iterations = 1e8;
+  % tolerance = 1e-7;
+  % max_iterations = 1e9;
 
-  width = 0.00005;
+  N = 1000;
+
+  width = 0.005;
   temperatures = linspace(T_crit - width, T_crit + width, 9);
-  chi_values = [2, 4, 8, 16, 32, 48, 64, 80];
+  chi_values = [32];
   % chi_values = [2, 4];
 
   legend_labels = arrayfun(@(chi) ['chi = ' num2str(chi)], chi_values, 'UniformOutput', false);
@@ -16,8 +17,10 @@ function plot_m_vs_T
   hold on
 
   for i = 1:numel(chi_values)
+    % order_parameters = ising_2d(temperatures, 'chi', chi_values(i), ...
+    %   'tolerance', tolerance, 'max_iterations', max_iterations);
     order_parameters = ising_2d(temperatures, 'chi', chi_values(i), ...
-      'tolerance', tolerance, 'max_iterations', max_iterations);
+      'N', N);
     plot(temperatures, order_parameters, ['--', MARKERS(i)])
   end
 

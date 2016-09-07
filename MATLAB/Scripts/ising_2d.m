@@ -38,7 +38,7 @@ function result = ising_2d(temperatures, varargin)
   J = 1;
 
   % result = calculate_order_parameters(1./temperatures);
-  result = calculate_free_energy_per_site(1./temperatures);
+  result = calculate_order_parameters(1./temperatures);
 
   function order_parameters = calculate_order_parameters(betas)
     number_of_points = numel(betas);
@@ -70,9 +70,9 @@ function result = ising_2d(temperatures, varargin)
     initial_T = spin_up_initial_T(beta);
 
 
-    % Without pause, database can crash if I make too many requests.
+    % Without, database can crash if I make too many requests.
     % This is really just a poor hack because I didn't organize everything into one query yet.
-    pause(0.001);
+    pause(0.15);
     sqlite3.open(database);
 
     if N
@@ -80,6 +80,7 @@ function result = ising_2d(temperatures, varargin)
     else
       [C, T] = environment_with_fixed_tolerance(beta, initial_C, initial_T);
     end
+    sqlite3.close(database);
   end
 
   function [C, T] = environment_with_fixed_iterations(beta, initial_C, initial_T)

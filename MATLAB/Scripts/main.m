@@ -3,9 +3,10 @@ function main
   format long;
 
   % plot_m_vs_chi_at_tcrit;
-% plot_m_vs_N_at_tcrit
-  plot_free_energy_vs_N_at_tcrit
-  % plot_m_vs_T
+  % plot_m_vs_N_at_tcrit
+  % plot_free_energy_vs_N_at_tcrit
+  plot_m_vs_T
+  % plot_free_energy_vs_N_at_tcrit
 
 
   % max_iterations = 1e6;

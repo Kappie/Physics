@@ -1,7 +1,7 @@
 function plot_m_vs_chi_at_tcrit()
   temperature = T_crit;
-  chi_values = [4:4:64];
-  N_values = [100, 1000, 10000];
+  chi_values = [4, 10, 40, 80, 100, 148];
+  N_values = [15242]
 
   legend_labels = arrayfun(@(N) ['N = ' num2str(N)], N_values, 'UniformOutput', false);
   MARKERS = markers;
