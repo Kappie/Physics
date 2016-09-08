@@ -72,7 +72,7 @@ function result = ising_2d(temperatures, varargin)
 
     % Without, database can crash if I make too many requests.
     % This is really just a poor hack because I didn't organize everything into one query yet.
-    pause(0.15);
+    pause(0.5);
     sqlite3.open(database);
 
     if N
