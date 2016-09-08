@@ -5,10 +5,13 @@ function main
 
   width = 0.005;
   temperatures = linspace(T_crit - width, T_crit + width, 9);
-  chi_values = [4];
+  chi_values = [4, 8, 12, 16, 20, 24, 28, 32];
   N_values = [100];
 
-  calculate_order_parameter(temperatures, chi_values, N_values)
+  % calculate_order_parameter(temperatures, chi_values, N_values)
+
+  % sqlite3.open('converged_tensors.db');
+  % sqlite3.execute('INSERT INTO tensors (temperature) VALUES (?)', 1)
 
   % data_collapse
 

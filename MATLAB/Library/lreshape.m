@@ -14,7 +14,7 @@ s = size(T);
 %adapt size in case of dim 1 legs
 s = [s ones(1,nlegs-numel(s))];
 dl = s(1:nl);
-dr = s(nl+1:nlegs); 
+dr = s(nl+1:nlegs);
 T=reshape(T,prod(dl),prod(dr));
 
 end
