@@ -2,7 +2,15 @@ function main
   clc;
   format long;
 
-  data_collapse
+
+  width = 0.005;
+  temperatures = linspace(T_crit - width, T_crit + width, 9);
+  chi_values = [4];
+  N_values = [100];
+
+  calculate_order_parameter(temperatures, chi_values, N_values)
+
+  % data_collapse
 
   % plot_m_vs_chi_at_tcrit;
   % plot_m_vs_N_at_tcrit
