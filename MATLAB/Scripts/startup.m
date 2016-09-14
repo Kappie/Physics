@@ -28,7 +28,4 @@ mathematica_colors = [ ...
 
 set(gca,'DefaultAxesColorOrder', mathematica_colors);
 
-
-
-% userpath('/Users/geertkapteijns/Documents/Natuurkunde/Scriptie/Code/MATLAB/Scripts/');
-% load_constants
+format long;
