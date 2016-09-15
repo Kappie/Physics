@@ -1,28 +1,14 @@
 function plot_m_vs_N_at_tcrit()
-  temperature = T_crit;
-  chi_values = [4, 10, 148];
-  N_values = fliplr( arrayfun(@round, linspace(0.3, 0.7, 30) .^ -8) );
-  MARKERS = markers();
+  temperatures = [T_crit];
+  chi_values = [4, 8, 12, 16, 32, 64, 148];
+  N_values = rounded_powerspace(-1/8, 0.32, 0.7, 30);
 
-  legend_labels = arrayfun(@(chi) ['chi = ' num2str(chi)], chi_values, 'UniformOutput', false);
+  data_points = calculate_order_parameter(temperatures, chi_values, 'N_values', N_values);
+  markerplot(N_values .^ (-1/8), squeeze(data_points(1, :, :)));
+  make_legend(chi_values, 'chi');
 
-  dataset = zeros(numel(N_values), numel(chi_values));
+  xlabel('$N^{-1/8}$');
+  ylabel('$|m|$');
+  export_fig('../Plots/figure2_nishino.pdf')
 
-  % figure
-  % hold on
-
-  for c = 1:numel(chi_values)
-    for n = 1:numel(N_values)
-      order_parameters = ising_2d([temperature], 'chi', chi_values(c), 'N', N_values(n));
-      dataset(n,c) = order_parameters(1);
-    end
-    save('nishino_fig2.mat', 'chi_values', 'N_values', 'dataset')
-    % plot(N_values, dataset(:, c), MARKERS(c))
-  end
-
-  % legend(legend_labels)
-  % xlabel('N')
-  % ylabel('|m|')
-  % title('Order parameter at T_c')
-  % hold off
 end

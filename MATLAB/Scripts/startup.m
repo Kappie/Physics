@@ -5,9 +5,9 @@ addpath ~/Documents/MATLAB/export_fig
 addpath ~/Documents/MATLAB/logfit
 
 addpath ~/Documents/Natuurkunde/Scriptie/Code/MATLAB/Library
-addpath ~/Documents/Natuurkunde/Scriptie/Code/MATLAB/Constants
 addpath ~/Documents/Natuurkunde/Scriptie/Code/MATLAB/Helpers
 
+set(groot, 'DefaultAxesTickLabelInterpreter', 'latex');
 
 mathematica_colors = [ ...
   0.368417, 0.506779, 0.709798;

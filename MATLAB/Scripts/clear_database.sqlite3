@@ -1,0 +1,2 @@
+.open 'converged_tensors.db';
+DELETE from tensors;

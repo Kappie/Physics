@@ -39,7 +39,7 @@ function data_collapse
 
   % make_legend(N_values, 'N')
 
-  export_fig('../Plots/datacollapse_chi32_N25-1000.pdf')
+  % export_fig('../Plots/datacollapse_chi32_N25-1000.pdf')
 
   function t = reduced_T(T)
     t = (T - T_crit) / T_crit;
