@@ -23,7 +23,7 @@ function [C, T, singular_values] = grow_lattice(temperature, chi, C, T)
   C = symmetrize_C(C);
   T = scale_by_largest_element(T);
   T = symmetrize_T(T);
-  singular_values = scale_singular_values(diag(s));
+  singular_values = scale_singular_values(diag(s))
 end
 
 function M = scale_by_largest_element(M)

@@ -1,7 +1,6 @@
 function [C, T] = calculate_environment_fixed_N(temperature, chi, N, initial_C, initial_T)
   C = initial_C;
   T = initial_T;
-  % a = construct_a(beta);
 
   for iteration = 1:N
     % [C, T, singular_values] = grow_lattice(C, T, a, chi);
